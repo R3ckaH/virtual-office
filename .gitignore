@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+.env
+.env.*.local
+*.log
+.turbo
+apps/web/dist
+
+# sync agent
+packages/sync-agent/release/
+packages/sync-agent/sync-state.json
+packages/sync-agent/config.json

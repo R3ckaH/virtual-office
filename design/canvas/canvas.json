@@ -1,0 +1,140 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Devices.dc.html": {
+      "h": 1180,
+      "page": "hr",
+      "title": "Biometric devices and sync",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Giving.dc.html": {
+      "h": 1320,
+      "is_interactive": true,
+      "page": "pay",
+      "title": "Tithes and covenant giving, Senior Pastor view (click Play)",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "HR.dc.html": {
+      "h": 1180,
+      "is_interactive": true,
+      "page": "hr",
+      "title": "HR attendance board (click Play)",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 1000,
+      "is_interactive": true,
+      "page": "floor",
+      "title": "Covenant Creators floor, animated (click Play)",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Payroll.dc.html": {
+      "h": 1320,
+      "is_interactive": true,
+      "page": "pay",
+      "title": "Payroll run, PH deductions (click Play)",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Phone.dc.html": {
+      "h": 844,
+      "page": "floor",
+      "title": "Office Floor, phone with person sheet",
+      "w": 390,
+      "x": 1520,
+      "y": 0
+    },
+    "Home.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1240,
+      "title": "Home dashboard, by person (click Play)",
+      "is_interactive": true,
+      "page": "home"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-30T16:55:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "hrtitle": {
+      "kind": "title1",
+      "maxW": 2960,
+      "page": "hr",
+      "text": "Covenant Creators \u00b7 HR Attendance",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "paytitle": {
+      "kind": "title1",
+      "maxW": 2960,
+      "page": "pay",
+      "text": "Covenant Creators \u00b7 Payroll & Giving",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "title": {
+      "kind": "title1",
+      "maxW": 1910,
+      "page": "floor",
+      "text": "Covenant Creators \u00b7 Office Floor",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "hometitle": {
+      "x": 0,
+      "y": -260,
+      "text": "Covenant Creators \u00b7 Home dashboard",
+      "kind": "title1",
+      "maxW": 1440,
+      "page": "home"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Phone.dc.html",
+    "HR.dc.html",
+    "Devices.dc.html",
+    "Payroll.dc.html",
+    "Giving.dc.html",
+    "Home.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "home",
+      "name": "Home dashboard"
+    },
+    {
+      "id": "floor",
+      "name": "Office Floor"
+    },
+    {
+      "id": "hr",
+      "name": "HR Attendance"
+    },
+    {
+      "id": "pay",
+      "name": "Payroll & Giving"
+    }
+  ],
+  "title": "Covenant Creators Office Floor"
+}

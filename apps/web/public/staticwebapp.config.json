@@ -1,0 +1,10 @@
+{
+  "navigationFallback": { "rewrite": "/index.html", "exclude": ["/assets/*", "/api/*", "*.{svg,png,ico,woff2}"] },
+  "globalHeaders": {
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "DENY",
+    "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-2gU7/kidvUEEqLwnsWrzt5TaXBCzN3e0oRi7C5PXySc='; connect-src 'self' wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  }
+}

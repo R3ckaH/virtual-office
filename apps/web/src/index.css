@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --canvas: 244 245 241;
+    --surface: 255 255 255;
+    --sunken: 236 238 233;
+    --ink: 27 34 48;
+    --muted: 88 97 113;
+    --line: 220 223 216;
+    --rail: 31 58 95;
+    --rail-ink: 226 232 240;
+    /* Company brand color; replaced at runtime from Admin settings */
+    --brand: 37 99 235;
+    --brand-ink: 255 255 255;
+    /* brand color used for text/links; a lighter tint in dark mode keeps AA contrast */
+    --brand-fg-dark: 110 160 245;
+    --brand-fg: var(--brand);
+    --ok: 21 128 61;
+    --warn: 180 83 9;
+    --danger: 190 18 60;
+    color-scheme: light;
+  }
+  .dark {
+    --canvas: 16 20 27;
+    --surface: 24 29 38;
+    --sunken: 20 24 32;
+    --ink: 232 234 238;
+    --muted: 152 160 174;
+    --line: 46 53 66;
+    --rail: 12 16 22;
+    --rail-ink: 200 208 220;
+    --ok: 74 222 128;
+    --warn: 251 191 36;
+    --danger: 251 113 133;
+    --brand-fg: var(--brand-fg-dark);
+    color-scheme: dark;
+  }
+  html {
+    @apply bg-canvas text-ink antialiased;
+    font-feature-settings: 'ss01';
+  }
+  body {
+    @apply min-h-screen font-sans text-[15px] leading-6;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand ring-offset-2 ring-offset-canvas;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  dialog::backdrop {
+    background: rgb(12 16 22 / 0.45);
+  }
+}

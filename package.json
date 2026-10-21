@@ -1,0 +1,19 @@
+{
+  "name": "virtual-office",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel -r --filter ./apps/* dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "db:migrate": "pnpm --filter @vo/api db:migrate",
+    "db:seed": "pnpm --filter @vo/api db:seed",
+    "db:reset": "pnpm --filter @vo/api db:reset",
+    "db:seed:demo": "pnpm --filter @vo/api db:seed:demo"
+  }
+}

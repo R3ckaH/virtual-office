@@ -1,0 +1,19 @@
+{
+  "apiUrl": "https://office.example.com/api",
+  "intervalSeconds": 60,
+  "devices": [
+    {
+      "name": "2F Studio terminal",
+      "token": "vod_paste-the-token-from-Biometric-devices",
+      "type": "zkteco",
+      "ip": "192.168.1.201",
+      "port": 4370
+    },
+    {
+      "name": "Warehouse unit (USB exports dropped in a shared folder)",
+      "token": "vod_another-token",
+      "type": "folder",
+      "path": "C:\\AttendanceExports\\Warehouse"
+    }
+  ]
+}

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tithes and covenant giving</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Figtree',system-ui,sans-serif;background:#F4F5F1}
+a{color:#1D4ED8}a:hover{color:#1E3A8A}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #2563EB;outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.row:hover{background:#F7F8F5}
+@keyframes pin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+.fresh{animation:pin .4s ease-out}
+.drawer{animation:slide .25s ease-out}
+@media (prefers-reduced-motion: reduce){.fresh,.drawer{animation:none!important}}
+</style>
+</helmet>
+<div id="top" style="position: relative; width: 1440px; height: 1320px; display: grid; grid-template-columns: 248px minmax(0, 1fr); background: #F4F5F1; color: #1B2230; font-family: 'Figtree', system-ui, sans-serif; overflow: hidden">
+<nav aria-label="Main" style="display: flex; flex-direction: column; gap: 3px; padding: 20px 12px 16px; background: #1F3A5F; color: #E2E8F0">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 12px 18px">
+<span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 9px; background: #2563EB; color: #FFFFFF; font-size: 15px; font-weight: 700">CC</span>
+<span style="display: flex; flex-direction: column; line-height: 1.2"><span style="font-size: 14px; font-weight: 700; color: #FFFFFF">Covenant Creators</span><span style="font-size: 12px; color: rgba(226,232,240,0.65)">Virtual Office</span></span>
+</div>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span>Home</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></svg><span>Office Floor</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg><span>Meetings</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Chat</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6h10M10 12h10M10 18h10M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span>Tasks</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Attendance</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Leave</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Reports</span></a>
+<p style="margin: 0; padding: 18px 12px 4px; font-size: 12px; font-weight: 600; color: rgba(226,232,240,0.6)">Admin, HR &amp; Finance</p>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 11a3 3 0 1 0 0-6M21 20c0-2.6-1.6-4.8-4-5.6"/></svg><span>People</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M16 15h2"/></svg><span>Payroll</span></a>
+<a href="#top" aria-current="page" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(255,255,255,0.15); color: #FFFFFF; font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Giving</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 11v3a8 8 0 0 1-1.5 4.5"/><path d="M8.5 9.5a4 4 0 0 1 7 2.5v2a11 11 0 0 1-.7 3.8"/><path d="M5.5 13.5V12a6.5 6.5 0 0 1 11.2-4.5"/><path d="M18.4 10.5c.4 1 .6 2 .6 3.2a14 14 0 0 1-.4 3.3"/><path d="M5 16.5c.3-.7.5-1.4.5-2.2"/></svg><span>Biometric devices</span></a>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-2h12v2"/></svg><span>Departments</span></a>
+<span style="flex-grow: 1"></span>
+<a href="#top" style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; background: transparent; color: rgba(226,232,240,0.85); font-size: 14px; font-weight: 500; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>Settings</span></a>
+</nav>
+<div style="display: flex; flex-direction: column; min-width: 0">
+<header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; gap: 22px; padding: 0 32px; border-bottom: 1px solid #DCDFD8">
+<span style="font-size: 14px"><span style="font-weight: 700">6:38 PM</span> <span style="color: #586171">Manila</span></span>
+<span style="font-size: 14px"><span style="font-weight: 700">6:38 AM</span> <span style="color: #586171">New York</span></span>
+<span style="flex-grow: 1"></span>
+<span style="display: flex; align-items: center; gap: 10px">
+<span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 999px; background: hsl(210 55% 88%); color: hsl(210 60% 24%); font-size: 12px; font-weight: 700">JS</span>
+<span style="display: flex; flex-direction: column; line-height: 1.2"><span style="font-size: 14px; font-weight: 600">Ptr. Joel Santiago</span><span style="font-size: 12px; color: #586171">Senior Pastor</span></span>
+</span>
+</header>
+<main style="display: flex; flex-direction: column; gap: 18px; padding: 22px 32px 28px">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.01em">Tithes &amp; covenant giving</h1>
+<p style="margin: 4px 0 0; font-size: 15px; color: #586171">Agency CEOs' tithe (10% of declared income) and covenant commitment set by capacity. 2026, January to date.</p>
+</div>
+<span style="display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 9px; background: #EEF1F6; color: #1F3A5F; font-size: 13px; font-weight: 600"><span style="display: flex"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>Visible to Ptr. Joel and the finance steward only</span>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border: 1px solid #DCDFD8; border-radius: 14px; padding: 14px 16px"><p style="margin: 0; font-size: 13px; color: #586171">Tithes received</p><p class="num" style="margin: 4px 0 0; font-size: 26px; font-weight: 700; color: #1F3A5F">{{totT}}</p><p style="margin: 4px 0 0; font-size: 12.5px; color: #586171">From 4 agency CEOs, year to date</p></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFD8; border-radius: 14px; padding: 14px 16px"><p style="margin: 0; font-size: 13px; color: #586171">Covenant giving received</p><p class="num" style="margin: 4px 0 0; font-size: 26px; font-weight: 700; color: #7A5200">{{totC}}</p><p style="margin: 4px 0 0; font-size: 12.5px; color: #586171">{{covPct}} of {{totPledged}} committed (Jan–Sep)</p></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFD8; border-radius: 14px; padding: 14px 16px"><p style="margin: 0; font-size: 13px; color: #586171">CEOs on track</p><p style="margin: 4px 0 0; font-size: 26px; font-weight: 700">{{onTrack}}</p><p style="margin: 4px 0 0; font-size: 12.5px; color: #586171">Within 10% of tithe and covenant</p></div>
+<div style="background: #FFFFFF; border: 1px solid #DCDFD8; border-radius: 14px; padding: 14px 16px"><p style="margin: 0; font-size: 13px; color: #586171">Staff giving through payroll</p><p class="num" style="margin: 4px 0 0; font-size: 26px; font-weight: 700">3 people</p><p style="margin: 4px 0 0; font-size: 12.5px; color: #586171">Voluntary, by signed authorization. Names stay private.</p></div>
+</div>
+
+<section aria-label="Agency CEOs" style="display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{ceos}}" as="c" hint-placeholder-count="4"><article style="background: #FFFFFF; border: 1px solid #DCDFD8; border-radius: 14px; padding: 16px 18px; display: grid; grid-template-columns: 260px minmax(0, 1fr) 210px; gap: 20px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; gap: 12px; align-items: center"><span style="{{c.avatarStyle}}">{{c.initials}}</span><div><h2 style="margin: 0; font-size: 16px; font-weight: 700">{{c.name}}</h2><p style="margin: 2px 0 0; font-size: 13px; color: #586171">CEO, {{c.agency}}</p></div></div>
+<dl style="margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; font-size: 13px">
+<dt style="color: #586171">Declared income</dt><dd class="num" style="margin: 0; font-weight: 700">{{c.income}}/mo</dd>
+<dt style="color: #586171">Declared</dt><dd style="margin: 0">{{c.declared}}</dd>
+</dl>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: #586171">Covenant level<select value="{{c.tierValue}}" onChange="{{c.setTier}}" style="height: 36px; padding: 0 8px; border-radius: 9px; border: 1px solid #C9CEC4; background: #FFFFFF; font-family: inherit; font-size: 13.5px; font-weight: 600; color: #1B2230"><sc-for list="{{c.tiers}}" as="t" hint-placeholder-count="4"><option value="{{t.value}}">{{t.label}}</option></sc-for></select></label>
+<span style="font-size: 12px; color: #586171">{{c.suggestedNote}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div>
+<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="font-weight: 700">Tithe <span style="font-weight: 500; color: #586171">({{c.titheExp}} a month)</span></span><span class="num"><span style="font-weight: 700">{{c.tYtd}}</span> <span style="color: #586171">of {{c.tDue}} due, {{c.tPct}}</span></span></div>
+<span style="display: block; height: 10px; margin-top: 6px; border-radius: 999px; background: #E6E9E2; overflow: hidden"><span style="{{c.tBar}}"></span></span>
+</div>
+<div>
+<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="font-weight: 700">Covenant <span style="font-weight: 500; color: #586171">({{c.tierLabel}}, {{c.pledge}} a month)</span></span><span class="num"><span style="font-weight: 700">{{c.cYtd}}</span> <span style="color: #586171">of {{c.cDue}} committed, {{c.cPct}}</span></span></div>
+<span style="display: block; height: 10px; margin-top: 6px; border-radius: 999px; background: #E6E9E2; overflow: hidden"><span style="{{c.cBar}}"></span></span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px" aria-label="Giving by month">
+<sc-for list="{{c.months}}" as="m" hint-placeholder-count="10"><span title="{{m.title}}" aria-label="{{m.title}}" style="{{m.style}}">{{m.m}}</span></sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; align-items: stretch">
+<span style="{{c.chipStyle}}; align-self: flex-start">{{c.status}}</span>
+<button type="button" onClick="{{c.record}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #2563EB; background: #2563EB; color: #FFFFFF; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Record a gift</button>
+<sc-if value="{{c.behind}}" hint-placeholder-val="{{false}}"><sc-if value="{{c.notReminded}}" hint-placeholder-val="{{true}}"><button type="button" onClick="{{c.remind}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #C9CEC4; background: #FFFFFF; color: #1B2230; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Send a gentle note</button></sc-if><sc-if value="{{c.reminded}}" hint-placeholder-val="{{false}}"><span class="fresh" style="font-size: 12.5px; font-weight: 600; color: #14532D">Note sent today</span></sc-if></sc-if>
+<button type="button" onClick="{{c.checkin}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #C9CEC4; background: #FFFFFF; color: #1B2230; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap">Book a check-in</button>
+</div>
+</article></sc-for>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 12.5px; color: #586171">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #15803D"></span>Tithe and covenant given</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #E7C66A"></span>Partly given</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #F4D3D9"></span>Nothing recorded</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #FFFFFF; box-shadow: inset 0 0 0 2px #2563EB"></span>October, in progress</span>
+</div>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start">
+<section aria-labelledby="lv" style="background: #FFFFFF; border: 1px solid #DCDFD8; border-radius: 14px; padding: 16px 18px">
+<h2 id="lv" style="margin: 0 0 4px; font-size: 16px; font-weight: 700">Covenant levels by capacity</h2>
+<p style="margin: 0 0 10px; font-size: 13px; color: #586171">Each CEO declares their agency's net income every quarter. The level is suggested from it, and Ptr. Joel can adjust it after talking with them.</p>
+<sc-for list="{{tiersDef}}" as="t" hint-placeholder-count="4"><div style="display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 12px; padding: 8px 0; border-top: 1px solid #ECEEE9; font-size: 13.5px"><span style="font-weight: 700">{{t.label}}</span><span style="color: #3F4756">{{t.range}}</span><span class="num" style="font-weight: 700">{{t.pledge}}/mo</span></div></sc-for>
+</section>
+<section aria-labelledby="pv" style="background: #FFFFFF; border: 1px solid #DCDFD8; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px">
+<h2 id="pv" style="margin: 0; font-size: 16px; font-weight: 700">Privacy and care</h2>
+<ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.55; color: #3F4756">
+<li>Giving records reveal religious affiliation, which is sensitive personal information under the Data Privacy Act (RA 10173). They are encrypted and every view is logged.</li>
+<li>Only Ptr. Joel and the finance steward see amounts. Each CEO sees only their own giving and receipts.</li>
+<li>Staff tithes are deducted from pay only with a signed authorization, and can be stopped at any time.</li>
+<li>Reminders are pastoral and never state an amount owed.</li>
+</ul>
+</section>
+</div>
+</main>
+</div>
+
+<sc-if value="{{hasForm}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,0.4)">
+<div role="dialog" aria-modal="true" aria-labelledby="gift-title" style="width: 440px; display: flex; flex-direction: column; gap: 14px; padding: 24px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,0.28)">
+<h2 id="gift-title" style="margin: 0; font-size: 20px; font-weight: 700">Record a gift from {{formName}}</h2>
+<div role="group" aria-label="Type of gift" style="display: flex; gap: 4px; padding: 4px; background: #E6E9E2; border-radius: 10px"><sc-for list="{{types}}" as="t" hint-placeholder-count="3"><button type="button" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" style="{{t.style}}">{{t.label}}</button></sc-for></div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600">Amount (PHP)<input type="text" inputmode="decimal" value="{{amount}}" onChange="{{onAmount}}" placeholder="45,000" style="height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid #C9CEC4; font-family: inherit; font-size: 16px"></label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600">Date<input type="date" value="2026-10-08" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #C9CEC4; font-family: inherit; font-size: 14px"></label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600">Received by<select style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #C9CEC4; background: #FFFFFF; font-family: inherit; font-size: 14px"><option>Bank transfer</option><option>GCash</option><option>Check</option><option>Cash</option></select></label>
+</div>
+<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px">
+<button type="button" onClick="{{cancel}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #C9CEC4; background: #FFFFFF; color: #1B2230; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap">Cancel</button>
+<button type="button" onClick="{{save}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid #2563EB; background: #2563EB; color: #FFFFFF; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap">Record and send receipt</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div role="status" style="position: absolute; left: 50%; bottom: 28px; z-index: 60; transform: translateX(-50%); padding: 12px 18px; border-radius: 12px; background: #1B2230; color: #FFFFFF; font-size: 14px; font-weight: 500; white-space: nowrap; box-shadow: 0 12px 32px rgba(15,23,42,0.3)">{{toast}}</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 1440, "height": 1320}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const C = [{"id": "andrew", "name": "Andrew Tan", "agency": "Harvest Media", "income": 450000, "tier": "growth", "declared": "Jul 1 (Q3)", "tithe": [45000, 45000, 42000, 45000, 45000, 45000, 0, 45000, 45000, 0], "cov": [30000, 30000, 30000, 30000, 30000, 30000, 30000, 0, 0, 0]}, {"id": "rachel", "name": "Rachel Uy", "agency": "Kingdom Digital", "income": 1200000, "tier": "harvest", "declared": "Jul 1 (Q3)", "tithe": [110000, 115000, 120000, 120000, 120000, 120000, 120000, 120000, 120000, 60000], "cov": [75000, 75000, 75000, 75000, 75000, 75000, 75000, 75000, 125000, 75000]}, {"id": "ben", "name": "Ben Ocampo", "agency": "Lighthouse Studio", "income": 260000, "tier": "seed", "declared": "Jul 1 (Q3)", "tithe": [26000, 0, 26000, 26000, 20000, 26000, 26000, 0, 26000, 0], "cov": [10000, 0, 10000, 0, 10000, 0, 10000, 0, 0, 0]}, {"id": "faith", "name": "Faith Castillo", "agency": "Mustard Seed Marketing", "income": 3400000, "tier": "kingdom", "declared": "Jul 1 (Q3)", "tithe": [300000, 320000, 340000, 340000, 340000, 340000, 340000, 340000, 340000, 0], "cov": [150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 0]}];
+    const tiers = {};
+    C.forEach((c) => (tiers[c.id] = c.tier));
+    this.state = { tiers: tiers, extra: {}, reminded: {}, form: null, toast: null, open: null };
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.toastTimer);
+  }
+
+  flash(msg) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: msg });
+    this.toastTimer = setTimeout(() => this.setState({ toast: null }), 3400);
+  }
+
+  peso(n) {
+    return '₱' + Math.round(n).toLocaleString('en-PH');
+  }
+
+  short(n) {
+    if (n >= 1000000) return '₱' + (Math.round(n / 100000) / 10) + 'M';
+    if (n >= 1000) return '₱' + Math.round(n / 1000) + 'k';
+    return '₱' + n;
+  }
+
+  hue(name) {
+    const hues = [210, 160, 30, 280, 340, 190, 100, 250];
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    return hues[h % hues.length];
+  }
+
+  tiersDef() {
+    return {
+      seed: { label: 'Seed', range: 'Under ₱300k net a month', pledge: 10000 },
+      growth: { label: 'Growth', range: '₱300k – ₱1M', pledge: 30000 },
+      harvest: { label: 'Harvest', range: '₱1M – ₱3M', pledge: 75000 },
+      kingdom: { label: 'Kingdom', range: 'Over ₱3M', pledge: 150000 }
+    };
+  }
+
+  suggested(income) {
+    return income < 300000 ? 'seed' : income < 1000000 ? 'growth' : income < 3000000 ? 'harvest' : 'kingdom';
+  }
+
+  renderVals() {
+    const st = this.state;
+    const C = [{"id": "andrew", "name": "Andrew Tan", "agency": "Harvest Media", "income": 450000, "tier": "growth", "declared": "Jul 1 (Q3)", "tithe": [45000, 45000, 42000, 45000, 45000, 45000, 0, 45000, 45000, 0], "cov": [30000, 30000, 30000, 30000, 30000, 30000, 30000, 0, 0, 0]}, {"id": "rachel", "name": "Rachel Uy", "agency": "Kingdom Digital", "income": 1200000, "tier": "harvest", "declared": "Jul 1 (Q3)", "tithe": [110000, 115000, 120000, 120000, 120000, 120000, 120000, 120000, 120000, 60000], "cov": [75000, 75000, 75000, 75000, 75000, 75000, 75000, 75000, 125000, 75000]}, {"id": "ben", "name": "Ben Ocampo", "agency": "Lighthouse Studio", "income": 260000, "tier": "seed", "declared": "Jul 1 (Q3)", "tithe": [26000, 0, 26000, 26000, 20000, 26000, 26000, 0, 26000, 0], "cov": [10000, 0, 10000, 0, 10000, 0, 10000, 0, 0, 0]}, {"id": "faith", "name": "Faith Castillo", "agency": "Mustard Seed Marketing", "income": 3400000, "tier": "kingdom", "declared": "Jul 1 (Q3)", "tithe": [300000, 320000, 340000, 340000, 340000, 340000, 340000, 340000, 340000, 0], "cov": [150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 150000, 0]}];
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+    const TD = this.tiersDef();
+    const P = (n) => this.peso(n);
+    const NOW = 9; // October, in progress (day 8)
+    const DUE = 9; // full months due: Jan to Sep
+    let totT = 0, totC = 0, totPledged = 0, onTrack = 0;
+
+    const ceos = C.map((c) => {
+      const extra = st.extra[c.id] || { tithe: 0, cov: 0 };
+      const tithe = c.tithe.slice();
+      const cov = c.cov.slice();
+      tithe[NOW] += extra.tithe;
+      cov[NOW] += extra.cov;
+      const tierId = st.tiers[c.id];
+      const tier = TD[tierId];
+      const titheExp = c.income * 0.1;
+      const tYtd = tithe.reduce((a, b) => a + b, 0);
+      const cYtd = cov.reduce((a, b) => a + b, 0);
+      const tDue = titheExp * DUE;
+      const cDue = tier.pledge * DUE;
+      totT += tYtd;
+      totC += cYtd;
+      totPledged += cDue;
+      const tPct = Math.min(100, Math.round((tYtd / tDue) * 100));
+      const cPct = Math.min(130, Math.round((cYtd / cDue) * 100));
+      const gap = cDue - cYtd;
+      let status, chip;
+      if (cYtd >= cDue * 1.05) { status = 'Ahead of covenant'; chip = ['#E3F1E8', '#14532D']; }
+      else if (cYtd >= cDue * 0.9 && tYtd >= tDue * 0.9) { status = 'On track'; chip = ['#E3F1E8', '#14532D']; }
+      else { status = 'Behind ' + this.short(Math.max(gap, 0) + Math.max(tDue - tYtd, 0)); chip = ['#FDF0DC', '#7C3F00']; }
+      if (status === 'On track' || status === 'Ahead of covenant') onTrack += 1;
+      const h = this.hue(c.name);
+      const parts = c.name.split(' ');
+      const months = MONTHS.map((m, i) => {
+        const tOk = tithe[i] >= titheExp * 0.95;
+        const cOk = cov[i] >= tier.pledge * 0.95;
+        const any = tithe[i] + cov[i] > 0;
+        let bg = '#F1F2EE', fg = '#586171', label = 'Nothing yet';
+        if (i === NOW && !any) { bg = '#FFFFFF'; label = 'October in progress'; }
+        else if (tOk && cOk) { bg = '#15803D'; fg = '#FFFFFF'; label = 'Tithe and covenant'; }
+        else if (any) { bg = '#E7C66A'; fg = '#3D2B00'; label = tOk ? 'Tithe only' : cOk ? 'Covenant only' : 'Partial'; }
+        else { bg = '#F4D3D9'; fg = '#8A1030'; label = 'No giving recorded'; }
+        return {
+          key: c.id + m,
+          m: m,
+          title: m + ': ' + label + '. Tithe ' + P(tithe[i]) + ', covenant ' + P(cov[i]),
+          style: 'display: flex; align-items: center; justify-content: center; height: 28px; border-radius: 6px; font-size: 11.5px; font-weight: 700; background: ' + bg + '; color: ' + fg + (i === NOW ? '; box-shadow: inset 0 0 0 2px #2563EB' : '')
+        };
+      });
+      const suggestedId = this.suggested(c.income);
+      return {
+        key: c.id,
+        name: c.name,
+        agency: c.agency,
+        initials: (parts[0][0] + parts[parts.length - 1][0]).toUpperCase(),
+        avatarStyle: 'display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; border-radius: 999px; font-size: 15px; font-weight: 700; background: hsl(' + h + ' 55% 88%); color: hsl(' + h + ' 60% 24%)',
+        income: P(c.income),
+        declared: c.declared,
+        tierLabel: tier.label,
+        pledge: P(tier.pledge),
+        suggestedNote: suggestedId === tierId ? 'Matches their capacity' : 'Capacity suggests ' + TD[suggestedId].label,
+        titheExp: P(titheExp),
+        tYtd: P(tYtd),
+        tDue: P(tDue),
+        cYtd: P(cYtd),
+        cDue: P(cDue),
+        tBar: 'display: block; height: 100%; border-radius: 999px; background: #1F3A5F; width: ' + tPct + '%',
+        cBar: 'display: block; height: 100%; border-radius: 999px; background: #A07A1E; width: ' + Math.min(100, cPct) + '%',
+        tPct: tPct + '%',
+        cPct: cPct + '%',
+        status: status,
+        chipStyle: 'display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; white-space: nowrap; background: ' + chip[0] + '; color: ' + chip[1],
+        behind: status.indexOf('Behind') === 0,
+        reminded: !!st.reminded[c.id],
+        notReminded: !st.reminded[c.id],
+        months: months,
+        tiers: Object.keys(TD).map((k) => ({ key: k, value: k, label: TD[k].label + ' – ' + this.short(TD[k].pledge) + '/mo', selected: k === tierId })),
+        tierValue: tierId,
+        setTier: (ev) => {
+          const v = ev.target.value;
+          this.setState((s) => ({ tiers: Object.assign({}, s.tiers, { [c.id]: v }) }));
+          this.flash(c.name.split(' ')[0] + '’s covenant is now ' + TD[v].label + ', ' + P(TD[v].pledge) + ' a month.');
+        },
+        remind: () => {
+          this.setState((s) => ({ reminded: Object.assign({}, s.reminded, { [c.id]: true }) }));
+          this.flash('A gentle note from Ptr. Joel was sent to ' + c.name.split(' ')[0] + '. Amounts are never included in the message.');
+        },
+        checkin: () => this.flash('Check-in with ' + c.name.split(' ')[0] + ' booked in the Senior Pastor’s office, Monday 3:00 PM.'),
+        record: () => this.setState({ form: { id: c.id, type: 'tithe', amount: '' } })
+      };
+    });
+
+    const f = st.form;
+    const fc = f ? C.find((c) => c.id === f.id) : null;
+    const types = [['tithe', 'Tithe'], ['cov', 'Covenant giving'], ['offering', 'Love offering']].map((t) => ({
+      key: t[0], label: t[1], pressed: f && f.type === t[0] ? 'true' : 'false',
+      style: 'flex-grow: 1; height: 36px; border-radius: 8px; border: 0; font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; ' + (f && f.type === t[0] ? 'background: #FFFFFF; color: #1B2230; box-shadow: 0 1px 2px rgba(27,34,48,0.12)' : 'background: transparent; color: #586171'),
+      pick: () => this.setState((s) => ({ form: Object.assign({}, s.form, { type: t[0] }) }))
+    }));
+    const save = () => {
+      const amt = Number(String(f.amount).replace(/[^0-9.]/g, ''));
+      if (!amt) return this.flash('Enter an amount first.');
+      const key = f.type === 'tithe' ? 'tithe' : 'cov';
+      this.setState((s) => {
+        const prev = s.extra[f.id] || { tithe: 0, cov: 0 };
+        const next = Object.assign({}, prev, { [key]: prev[key] + (f.type === 'offering' ? 0 : amt) });
+        return { extra: Object.assign({}, s.extra, { [f.id]: next }), form: null };
+      });
+      this.flash('Recorded ' + P(amt) + ' ' + (f.type === 'tithe' ? 'tithe' : f.type === 'cov' ? 'covenant giving' : 'love offering') + ' from ' + fc.name + '. A receipt was emailed.');
+    };
+
+    return {
+      ceos: ceos,
+      totT: P(totT),
+      totC: P(totC),
+      totPledged: P(totPledged),
+      covPct: Math.round((totC / totPledged) * 100) + '%',
+      onTrack: onTrack + ' of ' + C.length,
+      tiersDef: Object.keys(TD).map((k) => ({ key: k, label: TD[k].label, range: TD[k].range, pledge: P(TD[k].pledge) })),
+      hasForm: !!f,
+      formName: fc ? fc.name : '',
+      types: types,
+      amount: f ? f.amount : '',
+      onAmount: (ev) => { const v = ev.target.value; this.setState((s) => ({ form: Object.assign({}, s.form, { amount: v }) })); },
+      save: save,
+      cancel: () => this.setState({ form: null }),
+      hasToast: !!st.toast,
+      toast: st.toast || ''
+    };
+  }
+}
+</script>
+</body>
+</html>
