@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { addDays, AttendanceRules, localDate } from '@vo/shared';
 import { and, asc, eq, gte, inArray, lte, ne } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
+import { DomainEvents } from '../common/domain-events';
 import { DB, Db } from '../db/client';
 import { AttendanceDay, attendanceDays, attendanceExceptions, devices, Punch, punches, users } from '../db/schema';
 import { SettingsService } from '../settings/settings.service';
@@ -30,6 +31,7 @@ export class DayService {
     private readonly planner: PlannerService,
     private readonly rules: RulesService,
     private readonly settings: SettingsService,
+    private readonly domain: DomainEvents,
   ) {}
 
   async companyTz(): Promise<string> {
@@ -242,6 +244,7 @@ export class DayService {
     const workDate = p.workDate ?? (await this.workDateFor(p.userId, p.punchedAt));
     const [row] = await this.db.insert(punches).values({ ...p, workDate }).returning();
     const res = await this.recompute(p.userId, workDate, now);
+    this.domain.emit('punch', { userId: p.userId, kind: row.kind, punchedAt: row.punchedAt });
     return { punch: row as Punch, workDate, res };
   }
 

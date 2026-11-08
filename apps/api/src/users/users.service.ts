@@ -13,6 +13,7 @@ import { AuthEventsService } from '../auth/auth-events.service';
 import { AuthService, INVITE_TTL_MS } from '../auth/auth.service';
 import { SessionsService } from '../auth/sessions.service';
 import { env } from '../config/env';
+import { DomainEvents } from '../common/domain-events';
 import { DB, Db } from '../db/client';
 import { departments, User, users } from '../db/schema';
 import { actionEmail, MailService } from '../mail/mail.service';
@@ -41,6 +42,7 @@ export class UsersService {
     private readonly auth: AuthService,
     private readonly mail: MailService,
     private readonly settings: SettingsService,
+    private readonly domain: DomainEvents,
   ) {}
 
   /** Admins and HR see everyone; managers see their direct reports. */
@@ -157,6 +159,7 @@ export class UsersService {
       after: auditable(created),
       ip,
     });
+    this.domain.emit('userChanged', { userId: created.id });
     if (input.sendInvite) await this.sendAccountEmail(created);
     return (await this.reader.byId(created.id))!;
   }
@@ -177,6 +180,7 @@ export class UsersService {
     const d = diff(auditable(before), auditable(after));
     if (d.changed) {
       await this.audit.record({ actorId: actor.id, action: 'user.update', entityType: 'user', entityId: id, ...d, ip });
+      this.domain.emit('userChanged', { userId: id });
     }
     return (await this.reader.byId(id))!;
   }
@@ -187,6 +191,7 @@ export class UsersService {
     if (u.status === 'DEACTIVATED') return (await this.reader.byId(id))!;
     await this.assertNotLastAdmin(u);
     await this.db.update(users).set({ status: 'DEACTIVATED', deactivatedAt: new Date() }).where(eq(users.id, id));
+    this.domain.emit('userChanged', { userId: id });
     const revoked = await this.sessions.revokeAllForUser(id, 'deactivated', actor.id);
     await this.events.log({
       type: 'FORCED_LOGOUT',
@@ -212,6 +217,7 @@ export class UsersService {
       .update(users)
       .set({ status: 'ACTIVE', deactivatedAt: null, failedLoginCount: 0, lockedUntil: null })
       .where(eq(users.id, id));
+    this.domain.emit('userChanged', { userId: id });
     await this.audit.record({
       actorId: actor.id,
       action: u.status === 'ACTIVE' ? 'user.unlock' : 'user.activate',

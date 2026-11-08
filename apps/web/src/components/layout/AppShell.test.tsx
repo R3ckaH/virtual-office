@@ -5,7 +5,7 @@ import { RequireAuth, RequirePermission } from '@/components/layout/guards';
 import { loginResponse, me, mockApi, renderApp } from '@/test/utils';
 import { AppShell } from './AppShell';
 
-const config = { body: { companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null } };
+const config = { body: { companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null, realtimeUrl: null } };
 const ADMIN_PERMS = ['users.read', 'users.manage', 'departments.manage', 'authEvents.read', 'auditLogs.read', 'team.read', 'reports.read', 'settings.manage'];
 
 function App() {

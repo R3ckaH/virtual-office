@@ -1,6 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuditService } from './audit/audit.service';
+import { AccessService } from './auth/access.service';
+import { DomainEvents } from './common/domain-events';
 import { AuthEventsService } from './auth/auth-events.service';
 import { AuthService } from './auth/auth.service';
 import { SessionsService } from './auth/sessions.service';
@@ -22,6 +24,8 @@ import { UserReader } from './users/user-reader';
     }),
   ],
   providers: [
+    AccessService,
+    DomainEvents,
     AuditService,
     AuthEventsService,
     AuthService,
@@ -34,6 +38,8 @@ import { UserReader } from './users/user-reader';
   ],
   exports: [
     JwtModule,
+    AccessService,
+    DomainEvents,
     AuditService,
     AuthEventsService,
     AuthService,

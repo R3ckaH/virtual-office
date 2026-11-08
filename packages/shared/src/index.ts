@@ -3,6 +3,7 @@ import { isValidTimeZone } from './time';
 
 export * from './time';
 export * from './attendance';
+export * from './presence';
 
 /* ------------------------------------------------------------------ */
 /* Roles                                                               */
@@ -271,6 +272,8 @@ export interface PublicConfigDto {
   /** Where biometric terminals and the sync agent connect (the API's own host, e.g. the Railway
    *  domain). null when the API is served from the same host as the web app. */
   deviceHost: string | null;
+  /** where the browser opens the live (Socket.IO) connection; null = this site */
+  realtimeUrl: string | null;
 }
 
 export interface ApiErrorBody {
@@ -294,6 +297,7 @@ export const PERMISSIONS = [
   'devices.manage', // biometric devices, badge links, log imports
   'reports.read',
   'settings.manage',
+  'rooms.manage', // office floor rooms: names, types, owners, members
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

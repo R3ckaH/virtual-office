@@ -105,5 +105,6 @@ Then set `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` and/or `MICROSOFT_CLIENT_ID
 
 ## What changes in later phases
 
-- **Phase 3 (presence, office floor) and Phase 5 (chat)** open a WebSocket. That connection goes straight to the Railway domain, because Vercel does not forward WebSockets. The Content-Security-Policy in `vercel.json` will be updated to allow that one host, and the socket will authenticate with the short-lived access token.
+- **Phase 3 (done):** the office floor opens a WebSocket straight to the Railway domain, because Vercel does not forward WebSockets. The API tells the browser where to connect (`realtimeUrl` in `/api/config`: `https://<RAILWAY_PUBLIC_DOMAIN>` when `ORIGIN_SECRET` is set, or `REALTIME_URL` if you set it). The socket signs in with the access token, not cookies, and the existing CSP (`connect-src 'self' wss:`) already allows it. Nothing to configure.
+- **Phase 5 (chat)** uses the same connection.
 - **Phase 4 (meetings)** adds `LIVEKIT_*` variables on Railway and the LiveKit host to the CSP.

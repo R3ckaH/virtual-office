@@ -32,6 +32,8 @@ const envSchema = z.object({
   MICROSOFT_CLIENT_SECRET: z.string().optional().default(''),
   MICROSOFT_TENANT: z.string().default('organizations'),
   TRUST_PROXY: bool.default(false),
+  /** URL browsers open the live connection to (e.g. https://api.example.com). Defaults to the API's public domain when behind the Vercel proxy, or the same site otherwise. */
+  REALTIME_URL: z.string().url().optional().or(z.literal('')).default(''),
   /** host devices connect to directly; defaults to Railway's public domain */
   DEVICE_HOST: z.string().optional().default(''),
   RAILWAY_PUBLIC_DOMAIN: z.string().optional().default(''),

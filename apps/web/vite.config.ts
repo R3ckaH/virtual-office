@@ -14,7 +14,11 @@ export default defineConfig({
   server: {
     port: 5173,
     // Same-origin in dev: cookies stay SameSite=Strict and no CORS is needed.
-    proxy: { '/api': { target: 'http://localhost:4000', changeOrigin: false, xfwd: true } },
+    proxy: {
+      '/api': { target: 'http://localhost:4000', changeOrigin: false, xfwd: true },
+      // the live office connection (Socket.IO over WebSocket)
+      '/socket.io': { target: 'http://localhost:4000', ws: true },
+    },
   },
   build: { sourcemap: true, target: 'es2022' },
   test: {

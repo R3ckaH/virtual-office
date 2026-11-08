@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { edgeGuard, noStore } from './common/edge-guard';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { env } from './config/env';
+import { VoIoAdapter } from './presence/socket.adapter';
 
 /** Builds the configured app. Shared by main.ts and the e2e tests. */
 export async function createApp(): Promise<INestApplication> {
@@ -29,6 +30,7 @@ export async function createApp(): Promise<INestApplication> {
   app.enableCors({ origin: [e.WEB_ORIGIN], credentials: true });
   app.setGlobalPrefix('api', { exclude: ['iclock/cdata', 'iclock/getrequest', 'iclock/devicecmd'] });
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useWebSocketAdapter(new VoIoAdapter(app));
   app.enableShutdownHooks();
   return app;
 }

@@ -2,14 +2,14 @@
 
 A web-based virtual office for a remote team: clock in and out, see who's around on an office floor, meet over video, chat, and give managers a clear view of attendance.
 
-This repository is being built in seven phases. **Phase 2 (this release): clock in/out, schedules, attendance and biometric device sync.**
+This repository is being built in seven phases. **Phase 3 (this release): presence and the virtual office floor.**
 
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Auth, roles, user management, login/logout logging | ✅ Done |
 | 2 | Clock in/out, breaks, schedules, attendance, biometric sync | ✅ Done |
-| 3 | Presence + virtual office floor | Next |
-| 4 | Meetings (LiveKit) + calendar | |
+| 3 | Presence + virtual office floor | ✅ Done |
+| 4 | Meetings (LiveKit) + calendar | Next |
 | 5 | Chat + announcements | |
 | 6 | Leave, tasks, daily reports | |
 | 7 | Dashboards, reports, exports, admin settings | |
@@ -19,7 +19,7 @@ This repository is being built in seven phases. **Phase 2 (this release): clock 
 | Layer | Choice |
 |---|---|
 | Web | React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, React Hook Form |
-| API | Node.js 22, NestJS 11 (REST; Socket.IO arrives in Phase 3) |
+| API | Node.js 22, NestJS 11 (REST + Socket.IO for the live office floor) |
 | Database | PostgreSQL 16 with **Drizzle ORM** and versioned SQL migrations |
 | Shared | `packages/shared`: Zod validation schemas, DTO types and the role→permission map, used by both web and API |
 | Auth | Built in: argon2id passwords, TOTP 2-step sign-in, Google/Microsoft OIDC |
@@ -39,6 +39,7 @@ apps/
       auth/       login, 2FA, sessions, SSO, password reset, guards
       attendance/ clock, rules engine, HR board, exceptions, corrections, schedules, minute job
       devices/    biometric devices: cloud push (ADMS), agent/JSON ingest, file import, badge links
+      presence/   live office floor: Socket.IO gateway, rooms, statuses, knocks, summons
       users/      people admin + "me" profile
       departments/
       audit/      audit log + login history endpoints
@@ -48,14 +49,16 @@ apps/
   web/            React app
     src/
       components/ layout (shell, guards, idle timeout) and UI kit
-      pages/      auth, home, attendance, settings, admin (incl. HR attendance, schedules, devices)
-      lib/        API client, auth state, theme, formatting
+      components/floor/  the office floor (rooms, doors, walking people, 2D/3D camera)
+      pages/      auth, home, floor, attendance, settings, admin (incl. HR attendance, schedules, devices, rooms)
+      lib/        API client, auth state, live presence connection, theme, formatting
 packages/
   shared/         Zod schemas, types, permissions, time zone helpers
   sync-agent/     office PC program that reads devices on the LAN and uploads punches
 docs/
   phase-1.md      schema, endpoints, screens and security notes for Phase 1
   phase-2.md      the same for Phase 2 (attendance and biometric sync)
+  phase-3.md      the same for Phase 3 (presence and the office floor)
 ```
 
 ## Run it locally
@@ -103,7 +106,7 @@ pnpm test                 # API unit + e2e, web component tests
 pnpm typecheck
 ```
 
-Docker Compose creates the `vo_test` database for you (or point `TEST_DATABASE_URL` elsewhere). The API end-to-end suite rebuilds it from the migrations on every run, then exercises real HTTP requests: login, lockout, refresh-token rotation and reuse detection, inactivity timeout, force logout, 2-step sign-in, password reset, and the role check on every admin endpoint. Phase 2 adds the attendance rules engine (unit), and end-to-end runs of the web clock, ADMS cloud push, sync-agent upload, file import, exceptions, the two-step correction approval and the minute job, on a frozen clock.
+Docker Compose creates the `vo_test` database for you (or point `TEST_DATABASE_URL` elsewhere). The API end-to-end suite rebuilds it from the migrations on every run, then exercises real HTTP requests: login, lockout, refresh-token rotation and reuse detection, inactivity timeout, force logout, 2-step sign-in, password reset, and the role check on every admin endpoint. Phase 2 adds the attendance rules engine (unit), and end-to-end runs of the web clock, ADMS cloud push, sync-agent upload, file import, exceptions, the two-step correction approval and the minute job, on a frozen clock. Phase 3 adds the presence rules (unit) and end-to-end runs over real Socket.IO connections: sign-in on connect, rooms and access, knocks, summons, idle and chosen statuses, timesheet breaks moving people to the break room, force-logout ending the live connection, and room admin.
 
 ## Useful scripts
 

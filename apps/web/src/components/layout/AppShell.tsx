@@ -8,6 +8,7 @@ import {
   CalendarClock,
   CalendarDays,
   ClipboardCheck,
+  DoorOpen,
   Clock,
   FileClock,
   Fingerprint,
@@ -36,6 +37,9 @@ import { useAuth } from '@/lib/auth';
 import { usePublicConfig } from '@/lib/config';
 import { cityOf, formatTime } from '@/lib/format';
 import { ThemeChoice, useTheme } from '@/lib/theme';
+import { PresencePrompts } from '@/components/presence/PresencePrompts';
+import { StatusMenu } from '@/components/presence/StatusMenu';
+import { PresenceProvider } from '@/lib/presence';
 import { IdleGuard } from './IdleGuard';
 
 interface NavItem {
@@ -49,7 +53,7 @@ interface NavItem {
 
 const WORK: NavItem[] = [
   { to: '/', label: 'Home', icon: Home },
-  { to: '/floor', label: 'Office Floor', icon: Building2, phase: 3 },
+  { to: '/floor', label: 'Office Floor', icon: Building2 },
   { to: '/meetings', label: 'Meetings', icon: Video, phase: 4 },
   { to: '/chat', label: 'Chat', icon: MessageSquare, phase: 5 },
   { to: '/tasks', label: 'Tasks', icon: ListChecks, phase: 6 },
@@ -63,6 +67,7 @@ const ADMIN: NavItem[] = [
   { to: '/admin/attendance', label: 'Attendance board', icon: ClipboardCheck, permission: 'attendance.manage' },
   { to: '/admin/schedules', label: 'Schedules & setup', icon: CalendarClock, permission: 'attendance.manage' },
   { to: '/admin/devices', label: 'Biometric devices', icon: Fingerprint, permission: 'devices.manage' },
+  { to: '/admin/rooms', label: 'Office rooms', icon: DoorOpen, permission: 'rooms.manage' },
   { to: '/admin/departments', label: 'Departments', icon: Network, permission: 'departments.manage' },
   { to: '/admin/login-history', label: 'Login history', icon: KeyRound, permission: 'authEvents.read' },
   { to: '/admin/audit-log', label: 'Audit log', icon: FileClock, permission: 'auditLogs.read' },
@@ -234,6 +239,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
   );
 
   return (
+    <PresenceProvider>
     <div className="min-h-screen lg:grid lg:grid-cols-[248px_1fr]">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2">
         Skip to content
@@ -257,7 +263,8 @@ export function AppShell({ children }: { children?: ReactNode }) {
           </button>
           <span className="font-semibold lg:hidden">{config.data?.companyName ?? 'Virtual Office'}</span>
           <TeamClocks />
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <StatusMenu />
             <UserMenu />
           </div>
         </header>
@@ -266,6 +273,8 @@ export function AppShell({ children }: { children?: ReactNode }) {
         </main>
       </div>
       <IdleGuard />
+      <PresencePrompts />
     </div>
+    </PresenceProvider>
   );
 }

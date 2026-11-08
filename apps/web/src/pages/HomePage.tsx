@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Laptop, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TimeClockCard } from '@/components/attendance/TimeClockCard';
+import { OfficeNowCard } from '@/components/presence/OfficeNowCard';
 import { Badge, Panel } from '@/components/ui';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -54,6 +55,8 @@ export function HomePage() {
           </dl>
         </Panel>
       </div>
+
+      <OfficeNowCard />
 
       <Panel title="Where you're signed in" description="Sign out of any device you don't recognize from Profile & security.">
         {sessions.data ? (

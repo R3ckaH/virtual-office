@@ -2,6 +2,7 @@
  * Virtual Office schema.
  * Phase 1: auth, roles, users, login/logout logging, audit.
  * Phase 2: schedules, punches (web + biometric), computed attendance days, exceptions, corrections, devices.
+ * Phase 3: office floor rooms, room members, presence (room, chosen status, last seen).
  * All timestamps are `timestamptz` (stored in UTC). Tables/columns use snake_case.
  * Generate a migration after editing: `pnpm --filter @vo/api db:generate`
  */
@@ -15,6 +16,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -30,9 +32,12 @@ import {
   DEVICE_CONNECTIONS,
   EXCEPTION_STATUSES,
   EXCEPTION_TYPES,
+  FLOOR_SPOTS,
+  MANUAL_STATUSES,
   PUNCH_KINDS,
   PUNCH_SOURCES,
   ROLES,
+  ROOM_KINDS,
   USER_STATUSES,
   WORK_SETUPS,
 } from '@vo/shared';
@@ -59,6 +64,9 @@ export const exceptionStatusEnum = pgEnum('exception_status', EXCEPTION_STATUSES
 export const correctionStatusEnum = pgEnum('correction_status', CORRECTION_STATUSES);
 export const correctionActionEnum = pgEnum('correction_action', CORRECTION_ACTIONS);
 export const deviceConnectionEnum = pgEnum('device_connection', DEVICE_CONNECTIONS);
+export const roomKindEnum = pgEnum('room_kind', ROOM_KINDS);
+export const floorSpotEnum = pgEnum('floor_spot', FLOOR_SPOTS);
+export const manualStatusEnum = pgEnum('manual_status', MANUAL_STATUSES);
 export const preferSourceEnum = pgEnum('prefer_source', ['WEB', 'DEVICE']);
 
 /** Single-row table of company-wide settings (id is always 1). */
@@ -483,6 +491,52 @@ export const correctionRequests = pgTable(
   (t) => [index('corrections_status_idx').on(t.status), index('corrections_user_idx').on(t.userId), index('corrections_manager_idx').on(t.managerId)],
 );
 
+/* ---------------- Phase 3: office floor & presence ---------------- */
+
+/** One room per spot on the floor plan. Admins rename them and choose how each behaves. */
+export const rooms = pgTable('rooms', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  spot: floorSpotEnum('spot').notNull().unique(),
+  name: text('name').notNull(),
+  kind: roomKindEnum('kind').notNull(),
+  departmentId: uuid('department_id').references(() => departments.id, { onDelete: 'set null' }),
+  /** private office owner / host who can summon people */
+  ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/** People who may walk into a PRIVATE or LEADERS room without knocking. */
+export const roomMembers = pgTable(
+  'room_members',
+  {
+    roomId: uuid('room_id')
+      .notNull()
+      .references(() => rooms.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.roomId, t.userId] }), index('room_members_user_idx').on(t.userId)],
+);
+
+/**
+ * Where each person last was and what they chose to show. Live connection state is kept in memory;
+ * this row survives restarts and reconnects.
+ */
+export const presence = pgTable('presence', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  roomId: uuid('room_id').references(() => rooms.id, { onDelete: 'set null' }),
+  enteredAt: ts('entered_at'),
+  manualStatus: manualStatusEnum('manual_status'),
+  message: text('message'),
+  lastSeenAt: ts('last_seen_at'),
+  updatedAt: updatedAt(),
+});
+
 /* ---------------- relations (for the relational query API) ---------------- */
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -511,3 +565,5 @@ export type Device = typeof devices.$inferSelect;
 export type CorrectionRequest = typeof correctionRequests.$inferSelect;
 export type WorkSchedule = typeof workSchedules.$inferSelect;
 export type ScheduleDay = typeof scheduleDays.$inferSelect;
+export type Room = typeof rooms.$inferSelect;
+export type Presence = typeof presence.$inferSelect;

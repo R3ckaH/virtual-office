@@ -7,6 +7,17 @@ import { env } from '../config/env';
 import { DB, Db } from '../db/client';
 import { SettingsService } from './settings.service';
 
+/**
+ * Where browsers open the live connection. Behind the Vercel proxy (which can't carry WebSockets)
+ * that's the API's own domain; otherwise the same site as the web app (null).
+ */
+export function realtimeUrl(): string | null {
+  const e = env();
+  if (e.REALTIME_URL) return e.REALTIME_URL.replace(/\/$/, '');
+  const host = e.DEVICE_HOST || e.RAILWAY_PUBLIC_DOMAIN;
+  return e.ORIGIN_SECRET && host ? `https://${host}` : null;
+}
+
 @Public()
 @Controller()
 export class PublicController {
@@ -27,6 +38,7 @@ export class PublicController {
       sessionTimeoutMinutes: s.sessionTimeoutMinutes,
       ssoProviders: this.sso.enabledProviders(),
       deviceHost: env().DEVICE_HOST || env().RAILWAY_PUBLIC_DOMAIN || null,
+      realtimeUrl: realtimeUrl(),
     };
   }
 

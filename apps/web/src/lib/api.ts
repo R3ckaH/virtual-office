@@ -31,6 +31,17 @@ export function configureApi(opts: { onSessionEnd: SessionEndHandler; refresh: (
   refresher = opts.refresh;
 }
 
+/** Renews the access token (one renewal at a time per tab). Used by the live connection. */
+export function renewAccess(): Promise<boolean> {
+  refreshInFlight ??= refresher().finally(() => (refreshInFlight = null));
+  return refreshInFlight;
+}
+
+/** Ends the session in this tab with a reason the sign-in page can show. */
+export function endSession(code: string, message: string) {
+  onSessionEnd(code, message);
+}
+
 export function readCookie(name: string): string {
   const m = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return m ? decodeURIComponent(m[1]) : '';

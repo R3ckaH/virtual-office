@@ -15,6 +15,8 @@ import {
   devices,
   deviceUserLinks,
   orgSettings,
+  roomMembers,
+  rooms,
   scheduleAssignments,
   scheduleDays,
   users,
@@ -194,7 +196,29 @@ export async function seed(url = process.env.DATABASE_URL!) {
       await db.insert(deviceUserLinks).values(values).onConflictDoUpdate({ target: deviceUserLinks.deviceUserId, set: values });
     }
 
-    return { departments: deptIds, users: userIds, schedules: scheduleIds, devices: deviceIds };
+    // ---- Phase 3: the office floor (rooms come from the migration; here we set owners, members, departments)
+    const pastor = userIds.get('pastor@acme.test')!;
+    const ceos = ['andrew.tan@acme.test', 'rachel.uy@acme.test', 'ben.ocampo@acme.test', 'faith.castillo@acme.test'].map((e) => userIds.get(e)!);
+    const ROOM_SETUP: Record<string, { ownerId?: string; members?: string[]; dept?: string }> = {
+      pastor: { ownerId: pastor },
+      ceo: { ownerId: pastor, members: ceos },
+      eng: { dept: 'Engineering' },
+      sales: { dept: 'Sales' },
+      ops: { dept: 'Operations' },
+    };
+    const roomIds = new Map<string, string>();
+    for (const r of await db.select().from(rooms)) {
+      roomIds.set(r.spot, r.id);
+      const setup = ROOM_SETUP[r.spot] ?? {};
+      await db
+        .update(rooms)
+        .set({ ownerId: setup.ownerId ?? null, departmentId: setup.dept ? deptIds.get(setup.dept)! : null })
+        .where(eq(rooms.id, r.id));
+      await db.delete(roomMembers).where(eq(roomMembers.roomId, r.id));
+      if (setup.members?.length) await db.insert(roomMembers).values(setup.members.map((userId) => ({ roomId: r.id, userId })));
+    }
+
+    return { departments: deptIds, users: userIds, schedules: scheduleIds, devices: deviceIds, rooms: roomIds };
   } finally {
     await pool.end();
   }

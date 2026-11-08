@@ -1,0 +1,45 @@
+/* Office floor: animation and 3D styles carried over from the approved mockup. */
+.vo-char{position:absolute;width:40px;height:76px;margin:0;padding:0;border:0;background:transparent;cursor:pointer;font-family:inherit}
+.vo-char:hover .vo-body{filter:brightness(1.06)}
+.vo-char:focus-visible{outline:2px solid var(--brand-color,#2563eb);outline-offset:2px;border-radius:8px}
+.vo-room:hover,.vo-room:focus-visible{border-color:var(--vo-accent)!important}
+.vo-room:focus-visible{outline:2px solid var(--vo-accent);outline-offset:2px}
+@keyframes vo-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2px)}}
+@keyframes vo-bounce{from{transform:translateY(0)}to{transform:translateY(-2px)}}
+@keyframes vo-step{from{transform:translateY(0)}to{transform:translateY(-3.5px)}}
+@keyframes vo-blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(0.1)}}
+@keyframes vo-steam{0%{opacity:0;transform:translateY(0)}30%{opacity:.9}100%{opacity:0;transform:translateY(-9px)}}
+@keyframes vo-zzz{0%{opacity:0;transform:translate(0,0) scale(.7)}30%{opacity:1}100%{opacity:0;transform:translate(8px,-14px) scale(1.1)}}
+@keyframes vo-talk{0%,34%{opacity:1;transform:scale(1)}40%,100%{opacity:0;transform:scale(.5)}}
+@keyframes vo-ripple{from{transform:translate(-50%,-50%) scale(.3);opacity:.9}to{transform:translate(-50%,-50%) scale(2.4);opacity:0}}
+@keyframes vo-live{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes vo-ring{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(-18deg)}20%{transform:rotate(16deg)}30%{transform:rotate(-12deg)}40%{transform:rotate(8deg)}}
+@keyframes vo-hud{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vo-idle{animation:vo-breathe 2.8s ease-in-out infinite}
+.vo-walk{animation:vo-bounce .3s ease-in-out infinite alternate}
+.vo-walk .vo-leg-l{animation:vo-step .3s ease-in-out infinite alternate}
+.vo-walk .vo-leg-r{animation:vo-step .3s ease-in-out infinite alternate-reverse}
+.vo-eye{animation:vo-blink 4.6s infinite;transform-origin:center}
+.vo-steam{animation:vo-steam 1.8s ease-out infinite}
+.vo-zzz{animation:vo-zzz 2.6s ease-out infinite;opacity:0}
+.vo-talk{animation:vo-talk 3.6s infinite;opacity:0;transform-origin:bottom left}
+.vo-ripple{animation:vo-ripple 1.2s ease-out infinite}
+.vo-live{animation:vo-live 1.6s ease-in-out infinite}
+.vo-bell{animation:vo-ring 1.4s ease-in-out infinite;transform-origin:top center}
+.vo-hud{animation:vo-hud .35s ease-out}
+.vo-cam{transform-style:preserve-3d;transform-origin:400px 310px}
+.vo-plan{transition:box-shadow 900ms}
+.vo-3d,.vo-3d>*,.vo-3d>*>*,.vo-3d .vo-room{transform-style:preserve-3d}
+.vo-wall{transition:transform 700ms cubic-bezier(.2,.7,.2,1) 150ms,opacity 300ms}
+.vo-furn,.vo-desk,.vo-label{transition:transform 700ms cubic-bezier(.2,.7,.2,1)}
+.vo-3d .vo-furn{transform:translateZ(1px)}
+.vo-3d .vo-desk{transform:translateZ(16px)}
+.vo-3d .vo-desk.vo-on{transform:translateZ(17px)}
+.vo-3d .vo-label{transform:translateZ(2px)}
+.vo-door{transition:transform 380ms cubic-bezier(.3,.7,.3,1)}
+@media (prefers-reduced-motion: reduce){
+  .vo-hud{animation:none!important}
+  .vo-char,.vo-plan,.vo-cam,.vo-wall,.vo-furn,.vo-desk,.vo-label,.vo-door{transition:none!important}
+  .vo-idle,.vo-walk,.vo-walk .vo-leg-l,.vo-walk .vo-leg-r,.vo-eye,.vo-steam,.vo-ripple,.vo-live,.vo-bell{animation:none!important}
+  .vo-zzz,.vo-talk{animation:none!important;opacity:1}
+}

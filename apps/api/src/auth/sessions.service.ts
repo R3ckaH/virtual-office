@@ -4,13 +4,17 @@ import { and, desc, eq, gt, isNull, ne } from 'drizzle-orm';
 import { env } from '../config/env';
 import { randomToken, sha256 } from '../common/crypto';
 import type { ClientInfo } from '../common/request-context';
+import { DomainEvents } from '../common/domain-events';
 import { DB, Db } from '../db/client';
 import { Session, sessions } from '../db/schema';
 import { ACTIVITY_WRITE_INTERVAL_MS } from './session-policy';
 
 @Injectable()
 export class SessionsService {
-  constructor(@Inject(DB) private readonly db: Db) {}
+  constructor(
+    @Inject(DB) private readonly db: Db,
+    private readonly domain: DomainEvents,
+  ) {}
 
   async create(userId: string, client: ClientInfo, authMethod: string) {
     const secret = randomToken(32);
@@ -61,7 +65,8 @@ export class SessionsService {
       .update(sessions)
       .set({ revokedAt: new Date(), revokedReason: reason, revokedById })
       .where(and(eq(sessions.id, id), isNull(sessions.revokedAt)))
-      .returning({ id: sessions.id });
+      .returning({ id: sessions.id, userId: sessions.userId });
+    if (rows[0]) this.domain.emit('sessionsEnded', { userId: rows[0].userId });
     return rows.length > 0;
   }
 
@@ -74,6 +79,7 @@ export class SessionsService {
         and(eq(sessions.userId, userId), isNull(sessions.revokedAt), exceptId ? ne(sessions.id, exceptId) : undefined),
       )
       .returning({ id: sessions.id });
+    if (rows.length) this.domain.emit('sessionsEnded', { userId });
     return rows.length;
   }
 

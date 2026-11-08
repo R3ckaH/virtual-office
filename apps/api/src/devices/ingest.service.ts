@@ -4,6 +4,7 @@ import { localDate, zonedToUtc } from '@vo/shared';
 import { and, eq, inArray } from 'drizzle-orm';
 import { DayService } from '../attendance/day.service';
 import { safeEqual, sha256 } from '../common/crypto';
+import { DomainEvents } from '../common/domain-events';
 import { DB, Db } from '../db/client';
 import { attendanceExceptions, Device, devices, deviceUserLinks, punches, users } from '../db/schema';
 
@@ -38,6 +39,7 @@ export class IngestService {
   constructor(
     @Inject(DB) private readonly db: Db,
     private readonly days: DayService,
+    private readonly domain: DomainEvents,
   ) {}
 
   /** Looks up the device for a Bearer token (sync agent / JSON push). */
@@ -153,6 +155,9 @@ export class IngestService {
       .set({ lastSeenAt: now, ...(added && (!device.lastPunchAt || lastAt > device.lastPunchAt) ? { lastPunchAt: lastAt } : {}) })
       .where(and(eq(devices.id, device.id)));
     await this.days.recomputeMany(touched, now);
+    for (const userId of new Set([...touched].map((k) => k.split('|')[0]))) {
+      this.domain.emit('punch', { userId, kind: null, punchedAt: lastAt });
+    }
     return { added, duplicates, unknownUserIds: [...new Set([...unknown.keys()].map((k) => k.split('|')[0]))], errors };
   }
 

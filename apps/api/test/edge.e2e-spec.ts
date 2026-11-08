@@ -1,3 +1,5 @@
+import type { AddressInfo } from 'node:net';
+import { io } from 'socket.io-client';
 import { SEED_PASSWORD, setup, TestCtx, http } from './helpers';
 
 const SECRET = 'edge-secret-edge-secret-edge-secret-0123';
@@ -36,6 +38,22 @@ describe('Vercel edge guard (ORIGIN_SECRET)', () => {
   it('still refuses look-alike paths', async () => {
     expect((await http(ctx).get('/api/healthz')).status).toBe(403);
     expect((await http(ctx).get('/api/ingestx/status')).status).toBe(403);
+  });
+
+  it('lets the live office connection (Socket.IO) in without the secret; it signs in with the access token instead', async () => {
+    await ctx.app.listen(0, '127.0.0.1');
+    const port = (ctx.app.getHttpServer().address() as AddressInfo).port;
+    // sign in through the "proxy"
+    const login = await http(ctx).post('/api/auth/login').set('x-origin-secret', SECRET).send({ email: 'employee@acme.test', password: SEED_PASSWORD });
+    const socket = io(`http://127.0.0.1:${port}`, { transports: ['websocket'], auth: { token: login.body.accessToken }, reconnection: false, forceNew: true });
+    const snap = await new Promise<{ rooms: unknown[] }>((resolve, reject) => {
+      socket.once('floor:snapshot', resolve);
+      socket.once('connect_error', reject);
+    });
+    expect(snap.rooms).toHaveLength(9);
+    socket.disconnect();
+    // and polling (the fallback transport) isn't served by the HTTP stack either
+    expect((await http(ctx).get('/socket.io/?EIO=4&transport=polling')).status).not.toBe(403);
   });
 
   it('serves proxied requests and never lets them be cached', async () => {

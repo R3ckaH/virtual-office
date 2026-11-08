@@ -264,6 +264,6 @@ describe('Auth: login, logout, sessions (e2e)', () => {
 
   it('public config exposes branding and timeout, nothing secret', async () => {
     const res = await http(ctx).get('/api/config').expect(200);
-    expect(res.body).toEqual({ companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null });
+    expect(res.body).toEqual({ companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null, realtimeUrl: null });
   });
 });

@@ -6,7 +6,7 @@ import { RedirectIfSignedIn } from '@/components/layout/guards';
 import { loginResponse, me, mockApi, renderApp } from '@/test/utils';
 import { LoginPage } from './LoginPage';
 
-const config = { body: { companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null } };
+const config = { body: { companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null, realtimeUrl: null } };
 
 function App() {
   return (

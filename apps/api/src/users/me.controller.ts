@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service';
 import { AuthContext, CurrentAuth } from '../common/auth-context';
+import { DomainEvents } from '../common/domain-events';
 import { clientInfo } from '../common/request-context';
 import { ZodPipe } from '../common/zod.pipe';
 import { DB, Db } from '../db/client';
@@ -22,6 +23,7 @@ export class MeController {
     private readonly reader: UserReader,
     private readonly auth: AuthService,
     @Inject(DB) private readonly db: Db,
+    private readonly domain: DomainEvents,
   ) {}
 
   @Get()
@@ -31,7 +33,10 @@ export class MeController {
 
   @Patch()
   async update(@CurrentAuth() a: AuthContext, @Body(new ZodPipe(updateProfileSchema)) body: UpdateProfileInput) {
-    if (Object.keys(body).length) await this.db.update(users).set(body).where(eq(users.id, a.user.id));
+    if (Object.keys(body).length) {
+      await this.db.update(users).set(body).where(eq(users.id, a.user.id));
+      this.domain.emit('userChanged', { userId: a.user.id });
+    }
     return this.reader.me(a.user.id);
   }
 
