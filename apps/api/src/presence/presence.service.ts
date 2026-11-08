@@ -5,7 +5,7 @@ import {
   FloorSnapshotDto,
   KnockDto,
   ManualStatus,
-  MeetingDto,
+  GatheringDto,
   PresencePersonDto,
   RoomDto,
   roomAccess,
@@ -62,6 +62,8 @@ interface Person {
   onClockBreak: boolean;
   /** where to go back to when the break ends */
   breakReturnRoomId: string | null;
+  /** video calls this person is in right now (from LiveKit) */
+  calls: number;
   conns: Map<string, Conn>;
 }
 
@@ -174,6 +176,7 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
       lastSeenAt: prev?.lastSeenAt ?? p?.lastSeenAt ?? null,
       onClockBreak: prev?.onClockBreak ?? false,
       breakReturnRoomId: prev?.breakReturnRoomId ?? null,
+      calls: prev?.calls ?? 0,
       conns: prev?.conns ?? new Map(),
     };
   }
@@ -543,7 +546,7 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
     return { id: s.id, roomId: s.roomId, roomName: s.roomName, hostId: s.hostId, hostName: s.hostName, createdAt: s.createdAt };
   }
 
-  private meetingDtos(): MeetingDto[] {
+  private meetingDtos(): GatheringDto[] {
     return [...this.meetings.values()].map((m) => ({
       roomId: m.roomId,
       hostId: m.hostId,
@@ -649,6 +652,7 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
       connected,
       onClockBreak: p.onClockBreak,
       manual: p.manual,
+      inCall: p.calls > 0,
       roomKind: p.roomId ? this.roomKindCache.get(p.roomId) ?? null : null,
       idle: connected && [...p.conns.values()].every((c) => c.idle),
     });
@@ -686,6 +690,33 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
       meetings: this.meetingDtos(),
       me,
     };
+  }
+
+  /* ---------------- for other modules (meetings) ---------------- */
+
+  /** Sends an event to every open tab of one person. */
+  notify<E extends keyof ServerEvents>(userId: string, event: E, data: ServerEvents[E]) {
+    this.outbox?.toUser(userId, event, data);
+  }
+
+  /** The office room someone is in right now (null when offline). */
+  roomOf(userId: string): string | null {
+    const p = this.people.get(userId);
+    return p && p.conns.size > 0 ? p.roomId : null;
+  }
+
+  isOnline(userId: string): boolean {
+    return (this.people.get(userId)?.conns.size ?? 0) > 0;
+  }
+
+  /** Someone joined or left a video call; while in one they show as In a meeting. */
+  async callPresence(userId: string, delta: 1 | -1) {
+    await this.ensureLoaded();
+    const p = this.people.get(userId);
+    if (!p) return;
+    const before = p.calls > 0;
+    p.calls = Math.max(0, p.calls + delta);
+    if (before !== p.calls > 0) this.broadcast(p);
   }
 
   /** Seats per room, for tests and debugging. */

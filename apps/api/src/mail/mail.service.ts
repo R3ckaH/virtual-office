@@ -7,6 +7,10 @@ export interface OutgoingMail {
   subject: string;
   text: string;
   html: string;
+  /** e.g. a calendar invite (.ics) */
+  attachments?: { filename: string; content: string; contentType: string }[];
+  /** for invites: also send the calendar part inline so mail apps show Accept / Decline */
+  icalEvent?: { method: 'REQUEST' | 'CANCEL'; content: string };
 }
 
 /**
@@ -39,7 +43,8 @@ export class MailService {
     }
     const transport = this.getTransport();
     if (!transport) {
-      this.logger.log(`\n--- EMAIL (dev) ---\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${mail.text}\n-------------------`);
+      const extra = mail.attachments?.length ? `\n[attachments: ${mail.attachments.map((a) => a.filename).join(', ')}]` : '';
+      this.logger.log(`\n--- EMAIL (dev) ---\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${mail.text}${extra}\n-------------------`);
       return;
     }
     try {
@@ -52,6 +57,11 @@ export class MailService {
 }
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+/** Whether real email is configured (otherwise emails go to the log). */
+export function mailConfigured(): boolean {
+  return !!env().SMTP_HOST;
+}
 
 export function actionEmail(opts: {
   companyName: string;

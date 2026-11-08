@@ -26,7 +26,7 @@
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "X-Frame-Options": "DENY",
         "Permissions-Policy": "camera=(self), microphone=(self), display-capture=(self), geolocation=()",
-        "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-2gU7/kidvUEEqLwnsWrzt5TaXBCzN3e0oRi7C5PXySc='; connect-src 'self' wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-2gU7/kidvUEEqLwnsWrzt5TaXBCzN3e0oRi7C5PXySc='; connect-src 'self' wss: https://*.livekit.cloud; media-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
       },
       "continue": true
     },

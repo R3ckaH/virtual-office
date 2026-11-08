@@ -8,3 +8,6 @@ process.env.AUTH_RATE_LIMIT_PER_MIN = '10000';
 process.env.LOGIN_MAX_FAILED_ATTEMPTS = '5';
 process.env.WEB_ORIGIN = 'http://localhost:5173';
 process.env.TRUST_PROXY = '0';
+process.env.LIVEKIT_URL = process.env.TEST_LIVEKIT_URL ?? 'ws://127.0.0.1:7880';
+process.env.LIVEKIT_API_KEY = 'devkey';
+process.env.LIVEKIT_API_SECRET = 'secret';

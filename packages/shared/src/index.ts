@@ -4,6 +4,7 @@ import { isValidTimeZone } from './time';
 export * from './time';
 export * from './attendance';
 export * from './presence';
+export * from './meetings';
 
 /* ------------------------------------------------------------------ */
 /* Roles                                                               */
@@ -298,13 +299,14 @@ export const PERMISSIONS = [
   'reports.read',
   'settings.manage',
   'rooms.manage', // office floor rooms: names, types, owners, members
+  'meetings.schedule', // put meetings on the calendar and invite people (everyone can make instant calls)
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ADMIN: PERMISSIONS,
-  HR: ['users.read', 'attendance.manage', 'devices.manage', 'reports.read'],
-  MANAGER: ['users.read', 'team.read', 'reports.read'],
+  HR: ['users.read', 'attendance.manage', 'devices.manage', 'reports.read', 'meetings.schedule'],
+  MANAGER: ['users.read', 'team.read', 'reports.read', 'meetings.schedule'],
   EMPLOYEE: [],
 };
 

@@ -27,6 +27,8 @@ export async function createApp(): Promise<INestApplication> {
   app.useBodyParser('json', { limit: '100kb' });
   // ADMS devices post plain-text attendance logs to /iclock/* (often with no or odd content types)
   app.useBodyParser('text', { type: (req: { url?: string }) => (req.url ?? '').startsWith('/iclock/'), limit: '2mb' });
+  // LiveKit webhooks are verified against the exact body bytes, so keep them as text
+  app.useBodyParser('text', { type: (req: { url?: string }) => (req.url ?? '').startsWith('/api/livekit/webhook'), limit: '1mb' });
   app.enableCors({ origin: [e.WEB_ORIGIN], credentials: true });
   app.setGlobalPrefix('api', { exclude: ['iclock/cdata', 'iclock/getrequest', 'iclock/devicecmd'] });
   app.useGlobalFilters(new HttpExceptionFilter());

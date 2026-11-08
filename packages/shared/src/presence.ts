@@ -187,18 +187,21 @@ export interface StatusInputs {
   /** an open break on today's timesheet */
   onClockBreak: boolean;
   manual: ManualStatus | null;
+  /** in a video call right now (any meeting) */
+  inCall?: boolean;
   roomKind: RoomKind | null;
   idle: boolean;
 }
 
 /**
  * The status everyone else sees. Order matters:
- * offline → break on the timesheet → what the person picked → the room they're in → idle → available.
+ * offline → break on the timesheet → what the person picked → in a video call → the room they're in → idle → available.
  */
 export function deriveStatus(i: StatusInputs): PresenceStatus {
   if (!i.connected) return 'OFFLINE';
   if (i.onClockBreak) return 'ON_BREAK';
   if (i.manual) return i.manual;
+  if (i.inCall) return 'IN_MEETING';
   if (i.roomKind === 'MEETING' || i.roomKind === 'LEADERS') return 'IN_MEETING';
   if (i.roomKind === 'BREAK') return 'ON_BREAK';
   if (i.idle) return 'AWAY';
@@ -275,7 +278,7 @@ export interface PresencePersonDto {
 }
 
 /** A gathering someone called with Summon. */
-export interface MeetingDto {
+export interface GatheringDto {
   roomId: string;
   hostId: string;
   /** invited and not yet answered */
@@ -286,7 +289,7 @@ export interface MeetingDto {
 export interface FloorSnapshotDto {
   rooms: RoomDto[];
   people: PresencePersonDto[];
-  meetings: MeetingDto[];
+  meetings: GatheringDto[];
   /** your own id, so the client knows which avatar is you */
   me: string;
 }
@@ -351,13 +354,21 @@ export interface ServerEvents {
   'floor:snapshot': FloorSnapshotDto;
   'presence:update': PresencePersonDto;
   'rooms:update': RoomDto[];
-  'meetings:update': MeetingDto[];
+  'meetings:update': GatheringDto[];
   'knock:incoming': KnockDto;
   'knock:closed': { id: string };
   'knock:answered': { id: string; roomId: string; accepted: boolean; byName: string };
   'summon:incoming': SummonDto;
   'summon:closed': { id: string };
   'session:ended': { code: string; message: string };
+  /** someone is calling you (Phase 4) */
+  'call:incoming': import('./meetings').CallDto;
+  /** a call stopped ringing: answered elsewhere, cancelled by the caller, declined or timed out */
+  'call:ended': { meetingId: string; reason: 'answered' | 'cancelled' | 'declined' | 'timeout'; byName?: string };
+  /** a meeting starts soon */
+  'meeting:reminder': { meetingId: string; title: string; start: string };
+  /** a meeting you're in was created, changed or cancelled (refresh the calendar) */
+  'meetings:changed': { meetingId: string };
 }
 
 /** Socket.IO-style listener maps (for typing `io()` / `Server`). */

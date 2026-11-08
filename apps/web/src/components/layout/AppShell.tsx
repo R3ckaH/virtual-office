@@ -29,7 +29,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { lazy, ReactNode, Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { api } from '@/lib/api';
@@ -40,6 +40,8 @@ import { ThemeChoice, useTheme } from '@/lib/theme';
 import { PresencePrompts } from '@/components/presence/PresencePrompts';
 import { StatusMenu } from '@/components/presence/StatusMenu';
 import { PresenceProvider } from '@/lib/presence';
+import { CallsProvider, useCalls } from '@/lib/calls';
+import { CallPrompts } from '@/components/meetings/CallPrompts';
 import { IdleGuard } from './IdleGuard';
 
 interface NavItem {
@@ -54,7 +56,7 @@ interface NavItem {
 const WORK: NavItem[] = [
   { to: '/', label: 'Home', icon: Home },
   { to: '/floor', label: 'Office Floor', icon: Building2 },
-  { to: '/meetings', label: 'Meetings', icon: Video, phase: 4 },
+  { to: '/meetings', label: 'Meetings', icon: Video },
   { to: '/chat', label: 'Chat', icon: MessageSquare, phase: 5 },
   { to: '/tasks', label: 'Tasks', icon: ListChecks, phase: 6 },
   { to: '/attendance', label: 'Attendance', icon: Clock },
@@ -68,10 +70,23 @@ const ADMIN: NavItem[] = [
   { to: '/admin/schedules', label: 'Schedules & setup', icon: CalendarClock, permission: 'attendance.manage' },
   { to: '/admin/devices', label: 'Biometric devices', icon: Fingerprint, permission: 'devices.manage' },
   { to: '/admin/rooms', label: 'Office rooms', icon: DoorOpen, permission: 'rooms.manage' },
+  { to: '/admin/meetings', label: 'Meetings & video', icon: Video, permission: 'settings.manage' },
   { to: '/admin/departments', label: 'Departments', icon: Network, permission: 'departments.manage' },
   { to: '/admin/login-history', label: 'Login history', icon: KeyRound, permission: 'authEvents.read' },
   { to: '/admin/audit-log', label: 'Audit log', icon: FileClock, permission: 'auditLogs.read' },
 ];
+
+// LiveKit is a large download: load it the first time you join a call.
+const CallScreen = lazy(() => import('@/components/meetings/CallScreen').then((m) => ({ default: m.CallScreen })));
+
+function CallLayer() {
+  const { active } = useCalls();
+  return active ? (
+    <Suspense fallback={null}>
+      <CallScreen />
+    </Suspense>
+  ) : null;
+}
 
 function NavGroup({ label, items, onNavigate }: { label?: string; items: NavItem[]; onNavigate: () => void }) {
   const { can } = useAuth();
@@ -240,7 +255,8 @@ export function AppShell({ children }: { children?: ReactNode }) {
 
   return (
     <PresenceProvider>
-    <div className="min-h-screen lg:grid lg:grid-cols-[248px_1fr]">
+    <CallsProvider>
+    <div id="app-shell" className="min-h-screen lg:grid lg:grid-cols-[248px_1fr]">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2">
         Skip to content
       </a>
@@ -274,7 +290,10 @@ export function AppShell({ children }: { children?: ReactNode }) {
       </div>
       <IdleGuard />
       <PresencePrompts />
+      <CallPrompts />
     </div>
+    <CallLayer />
+    </CallsProvider>
     </PresenceProvider>
   );
 }

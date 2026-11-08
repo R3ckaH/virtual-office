@@ -34,6 +34,16 @@ const envSchema = z.object({
   TRUST_PROXY: bool.default(false),
   /** URL browsers open the live connection to (e.g. https://api.example.com). Defaults to the API's public domain when behind the Vercel proxy, or the same site otherwise. */
   REALTIME_URL: z.string().url().optional().or(z.literal('')).default(''),
+  /** LiveKit (video). Server URL like wss://your-project.livekit.cloud, plus an API key and secret. */
+  LIVEKIT_URL: z.string().optional().default(''),
+  LIVEKIT_API_KEY: z.string().optional().default(''),
+  LIVEKIT_API_SECRET: z.string().optional().default(''),
+  /** S3-compatible storage for meeting recordings (Railway bucket, Cloudflare R2, AWS S3…) */
+  RECORDINGS_S3_ENDPOINT: z.string().optional().default(''),
+  RECORDINGS_S3_BUCKET: z.string().optional().default(''),
+  RECORDINGS_S3_REGION: z.string().optional().default('auto'),
+  RECORDINGS_S3_ACCESS_KEY: z.string().optional().default(''),
+  RECORDINGS_S3_SECRET_KEY: z.string().optional().default(''),
   /** host devices connect to directly; defaults to Railway's public domain */
   DEVICE_HOST: z.string().optional().default(''),
   RAILWAY_PUBLIC_DOMAIN: z.string().optional().default(''),

@@ -4,10 +4,11 @@ import type {
   ClientEvents,
   FloorSnapshotDto,
   KnockDto,
-  MeetingDto,
+  GatheringDto,
   PresencePersonDto,
   RoomDto,
   ServerEventListeners,
+  ServerEvents,
   SummonDto,
 } from '@vo/shared';
 import { IDLE_AWAY_MINUTES } from '@vo/shared';
@@ -24,7 +25,7 @@ export interface PresenceState {
   me: string | null;
   rooms: RoomDto[];
   people: Record<string, PresencePersonDto>;
-  meetings: MeetingDto[];
+  meetings: GatheringDto[];
   /** knocks on the room I'm in */
   knocks: KnockDto[];
   /** invitations to join a meeting */
@@ -35,7 +36,13 @@ export interface PresenceState {
   knockAnswer: { roomId: string; accepted: boolean; byName: string } | null;
   send: <E extends keyof ClientEvents, T = unknown>(event: E, payload: ClientEvents[E]) => Promise<Ack<T>>;
   dismissSummon: (id: string) => void;
+  /** listen for call and meeting events; returns the unsubscribe function */
+  on: <E extends ForwardedEvent>(event: E, cb: (data: ServerEvents[E]) => void) => () => void;
 }
+
+/** Server events other parts of the app (calls, meetings) can listen to. */
+const FORWARDED = ['call:incoming', 'call:ended', 'meeting:reminder', 'meetings:changed'] as const;
+export type ForwardedEvent = (typeof FORWARDED)[number];
 
 const empty: PresenceState = {
   connection: 'offline',
@@ -49,6 +56,7 @@ const empty: PresenceState = {
   knockAnswer: null,
   send: async () => ({ ok: false, message: 'Not connected to the office yet.', code: 'NOT_CONNECTED' }),
   dismissSummon: () => undefined,
+  on: () => () => undefined,
 };
 
 const PresenceContext = createContext<PresenceState>(empty);
@@ -73,6 +81,7 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
   const [myKnock, setMyKnock] = useState<KnockDto | null>(null);
   const [knockAnswer, setKnockAnswer] = useState<PresenceState['knockAnswer']>(null);
   const socketRef = useRef<VoSocket | null>(null);
+  const listeners = useRef(new Map<string, Set<(d: unknown) => void>>());
 
   const ready = status === 'signedIn' && config.isSuccess;
   const url = config.data?.realtimeUrl ?? undefined;
@@ -133,6 +142,11 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
     });
     socket.on('summon:incoming', (s) => setSummons((ss) => [...ss.filter((x) => x.id !== s.id), s]));
     socket.on('summon:closed', ({ id }) => setSummons((ss) => ss.filter((s) => s.id !== id)));
+    for (const ev of FORWARDED) {
+      (socket as unknown as Socket).on(ev, (data: unknown) => {
+        for (const cb of listeners.current.get(ev) ?? []) cb(data);
+      });
+    }
     socket.on('session:ended', ({ code, message }) => {
       setConnection('offline');
       endSession(code, message);
@@ -195,6 +209,13 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const on = useCallback<PresenceState['on']>((event, cb) => {
+    const set = listeners.current.get(event) ?? new Set();
+    set.add(cb as (d: unknown) => void);
+    listeners.current.set(event, set);
+    return () => void set.delete(cb as (d: unknown) => void);
+  }, []);
+
   const dismissSummon = useCallback((id: string) => setSummons((ss) => ss.filter((s) => s.id !== id)), []);
 
   const value = useMemo<PresenceState>(
@@ -210,8 +231,9 @@ export function PresenceProvider({ children }: { children: ReactNode }) {
       knockAnswer,
       send,
       dismissSummon,
+      on,
     }),
-    [connection, snapshot, people, knocks, summons, myKnock, knockAnswer, send, dismissSummon],
+    [connection, snapshot, people, knocks, summons, myKnock, knockAnswer, send, dismissSummon, on],
   );
   return <PresenceContext.Provider value={value}>{children}</PresenceContext.Provider>;
 }

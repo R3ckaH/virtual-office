@@ -1,7 +1,7 @@
 import type { PresencePersonDto, PresenceStatus, RoomDto } from '@vo/shared';
 import { IDLE_AWAY_MINUTES, PRESENCE_LABELS, PRESENCE_STATUSES, ROOM_KIND_LABELS, roomAccess } from '@vo/shared';
 import { clsx } from 'clsx';
-import { BellRing, DoorOpen, MessageSquare, Phone, X } from 'lucide-react';
+import { BellRing, DoorOpen, MessageSquare, Phone, Video, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { FloorPlan } from '@/components/floor/FloorPlan';
 import { StatusDot } from '@/components/presence/StatusDot';
@@ -9,6 +9,7 @@ import { Alert, Button, Dialog, PageHeader, Panel, Spinner } from '@/components/
 import { Avatar } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/lib/auth';
+import { useCalls } from '@/lib/calls';
 import { cityOf, formatRelative, formatTime } from '@/lib/format';
 import { useOccupants, usePresence } from '@/lib/presence';
 
@@ -70,6 +71,7 @@ export function FloorPage() {
   const selectedPerson = selected ? people[selected] : undefined;
   const knockInside = knockRoom ? (occupants.get(knockRoom.id) ?? []).filter((p) => p.userId !== me) : [];
   const waitingAt = myKnock ? rooms.find((r) => r.id === myKnock.roomId) : undefined;
+  const myRoom = mine?.roomId ? rooms.find((r) => r.id === mine.roomId) : undefined;
 
   return (
     <>
@@ -95,6 +97,8 @@ export function FloorPage() {
           Knock knock. Waiting for someone in {waitingAt.name} to let you in…
         </div>
       )}
+
+      {myRoom && myRoom.kind !== 'OPEN' && myRoom.kind !== 'BREAK' && <RoomCallBar room={myRoom} others={(occupants.get(myRoom.id) ?? []).length - 1} />}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 space-y-3">
@@ -249,6 +253,7 @@ function PersonCard({
   onGo: (r: RoomDto) => void;
 }) {
   const { me, people } = usePresence();
+  const { callPeople, pending, active } = useCalls();
   const myRoomId = me ? people[me]?.roomId ?? null : null;
   const online = p.status !== 'OFFLINE';
   const access = room && me ? roomAccess({ ...room, occupantCount: 1 }, me) : 'enter';
@@ -298,13 +303,39 @@ function PersonCard({
           <Button size="sm" variant="secondary" disabled title="Chat arrives in Phase 5">
             <MessageSquare className="h-4 w-4" aria-hidden /> Message
           </Button>
-          <Button size="sm" variant="secondary" disabled title="Calls arrive in Phase 4">
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={!online || !!active}
+            loading={pending === p.userId}
+            title={!online ? `${p.fullName} is offline` : active ? 'Leave your current call first' : undefined}
+            onClick={() => void callPeople([p.userId], [p.fullName])}
+          >
             <Phone className="h-4 w-4" aria-hidden /> Call
           </Button>
         </div>
       )}
-      {!isMe && <p className="mt-2 text-xs text-muted">Messages and calls arrive with Chat and Meetings.</p>}
+      {!isMe && online && p.status === 'BUSY' && <p className="mt-2 text-xs text-muted">{p.fullName.split(' ')[0]} is busy. Call only if it can’t wait.</p>}
+      {!isMe && <p className="mt-2 text-xs text-muted">Messages arrive with Chat.</p>}
     </Panel>
+  );
+}
+
+/** In a meeting room or office: the room's own video call, for people who aren't on the floor together in person. */
+function RoomCallBar({ room, others }: { room: RoomDto; others: number }) {
+  const { joinRoomCall, pending, active } = useCalls();
+  const inThisCall = active?.kind === 'ROOM' && active.title === `${room.name} call`;
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 text-sm">
+      <Video className="h-4 w-4 text-brand-fg" aria-hidden />
+      <span className="flex-1">
+        You’re in <strong className="font-semibold">{room.name}</strong>
+        {others > 0 ? ` with ${others} ${others === 1 ? 'other person' : 'others'}.` : '.'} Start a video call here and anyone who walks in can join.
+      </span>
+      <Button size="sm" onClick={() => void joinRoomCall(room.id)} loading={pending === room.id} disabled={!!active}>
+        {inThisCall ? 'In the call' : 'Join the room call'}
+      </Button>
+    </div>
   );
 }
 

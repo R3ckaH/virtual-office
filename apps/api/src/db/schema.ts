@@ -3,10 +3,11 @@
  * Phase 1: auth, roles, users, login/logout logging, audit.
  * Phase 2: schedules, punches (web + biometric), computed attendance days, exceptions, corrections, devices.
  * Phase 3: office floor rooms, room members, presence (room, chosen status, last seen).
+ * Phase 4: meetings (scheduled, instant, room calls), invitees, attendance, reminders, recordings, calendar feeds.
  * All timestamps are `timestamptz` (stored in UTC). Tables/columns use snake_case.
  * Generate a migration after editing: `pnpm --filter @vo/api db:generate`
  */
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   AnyPgColumn,
   boolean,
@@ -34,6 +35,11 @@ import {
   EXCEPTION_TYPES,
   FLOOR_SPOTS,
   MANUAL_STATUSES,
+  MEETING_KINDS,
+  MEETING_STATUSES,
+  RECORDING_STATUSES,
+  RECURRENCES,
+  RSVPS,
   PUNCH_KINDS,
   PUNCH_SOURCES,
   ROLES,
@@ -67,6 +73,11 @@ export const deviceConnectionEnum = pgEnum('device_connection', DEVICE_CONNECTIO
 export const roomKindEnum = pgEnum('room_kind', ROOM_KINDS);
 export const floorSpotEnum = pgEnum('floor_spot', FLOOR_SPOTS);
 export const manualStatusEnum = pgEnum('manual_status', MANUAL_STATUSES);
+export const meetingKindEnum = pgEnum('meeting_kind', MEETING_KINDS);
+export const meetingStatusEnum = pgEnum('meeting_status', MEETING_STATUSES);
+export const recurrenceEnum = pgEnum('recurrence', RECURRENCES);
+export const rsvpEnum = pgEnum('rsvp', RSVPS);
+export const recordingStatusEnum = pgEnum('recording_status', RECORDING_STATUSES);
 export const preferSourceEnum = pgEnum('prefer_source', ['WEB', 'DEVICE']);
 
 /** Single-row table of company-wide settings (id is always 1). */
@@ -77,6 +88,8 @@ export const orgSettings = pgTable('org_settings', {
   logoUrl: text('logo_url'),
   defaultTimezone: text('default_timezone').notNull().default('Asia/Manila'),
   sessionTimeoutMinutes: integer('session_timeout_minutes').notNull().default(30),
+  /** Phase 4: an Admin allows meeting recordings (they also need storage configured on the server) */
+  recordingEnabled: boolean('recording_enabled').notNull().default(false),
   updatedAt: updatedAt(),
 });
 
@@ -537,6 +550,130 @@ export const presence = pgTable('presence', {
   updatedAt: updatedAt(),
 });
 
+/* ---------------- Phase 4: meetings ---------------- */
+
+/** Scheduled meetings, instant calls and the ongoing call of each office meeting room. */
+export const meetings = pgTable(
+  'meetings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    kind: meetingKindEnum('kind').notNull(),
+    title: text('title').notNull(),
+    description: text('description'),
+    hostId: uuid('host_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** first occurrence (instant calls: when the call started) */
+    startsAt: ts('starts_at').notNull(),
+    durationMinutes: integer('duration_minutes').notNull(),
+    timezone: text('timezone').notNull(),
+    recurrence: recurrenceEnum('recurrence').notNull().default('NONE'),
+    /** last local date a repeating meeting happens on (inclusive) */
+    recurrenceUntil: date('recurrence_until'),
+    /** where on the office floor it happens (optional); for ROOM calls, the room itself */
+    officeRoomId: uuid('office_room_id').references(() => rooms.id, { onDelete: 'set null' }),
+    status: meetingStatusEnum('status').notNull().default('ACTIVE'),
+    /** bumped on every change so calendar apps replace the old copy */
+    sequence: integer('sequence').notNull().default(0),
+    endedAt: ts('ended_at'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index('meetings_host_idx').on(t.hostId),
+    index('meetings_starts_idx').on(t.startsAt),
+    uniqueIndex('meetings_room_call_uq').on(t.officeRoomId).where(sql`kind = 'ROOM'`),
+  ],
+);
+
+export const meetingInvitees = pgTable(
+  'meeting_invitees',
+  {
+    meetingId: uuid('meeting_id')
+      .notNull()
+      .references(() => meetings.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    response: rsvpEnum('response').notNull().default('PENDING'),
+    respondedAt: ts('responded_at'),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.meetingId, t.userId] }), index('meeting_invitees_user_idx').on(t.userId)],
+);
+
+/** One row per time someone joined a call (from LiveKit's webhooks). */
+export const meetingAttendance = pgTable(
+  'meeting_attendance',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    meetingId: uuid('meeting_id')
+      .notNull()
+      .references(() => meetings.id, { onDelete: 'cascade' }),
+    occurrenceStart: ts('occurrence_start').notNull(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** LiveKit participant session id, so duplicate webhooks are ignored */
+    participantSid: text('participant_sid').notNull(),
+    joinedAt: ts('joined_at').notNull(),
+    leftAt: ts('left_at'),
+  },
+  (t) => [
+    uniqueIndex('meeting_attendance_sid_uq').on(t.participantSid),
+    index('meeting_attendance_meeting_idx').on(t.meetingId, t.occurrenceStart),
+    index('meeting_attendance_user_idx').on(t.userId),
+  ],
+);
+
+/** Reminders already sent, so the minute job never sends one twice. */
+export const meetingNotifications = pgTable(
+  'meeting_notifications',
+  {
+    meetingId: uuid('meeting_id')
+      .notNull()
+      .references(() => meetings.id, { onDelete: 'cascade' }),
+    occurrenceStart: ts('occurrence_start').notNull(),
+    kind: text('kind').notNull(),
+    sentAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.meetingId, t.occurrenceStart, t.kind] })],
+);
+
+export const meetingRecordings = pgTable(
+  'meeting_recordings',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    meetingId: uuid('meeting_id')
+      .notNull()
+      .references(() => meetings.id, { onDelete: 'cascade' }),
+    occurrenceStart: ts('occurrence_start').notNull(),
+    egressId: text('egress_id').notNull().unique(),
+    status: recordingStatusEnum('status').notNull().default('STARTING'),
+    startedById: uuid('started_by_id').references(() => users.id, { onDelete: 'set null' }),
+    startedAt: ts('started_at').notNull(),
+    endedAt: ts('ended_at'),
+    /** object key in the recordings bucket */
+    fileKey: text('file_key'),
+    sizeBytes: integer('size_bytes'),
+    durationSeconds: integer('duration_seconds'),
+    error: text('error'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('meeting_recordings_meeting_idx').on(t.meetingId)],
+);
+
+/** Private calendar subscription links (hash of the secret token). */
+export const calendarFeeds = pgTable('calendar_feeds', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  /** the token itself, encrypted (AES-256-GCM), so the link can be shown again */
+  tokenEnc: text('token_enc').notNull(),
+  createdAt: createdAt(),
+});
+
 /* ---------------- relations (for the relational query API) ---------------- */
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -567,3 +704,5 @@ export type WorkSchedule = typeof workSchedules.$inferSelect;
 export type ScheduleDay = typeof scheduleDays.$inferSelect;
 export type Room = typeof rooms.$inferSelect;
 export type Presence = typeof presence.$inferSelect;
+export type Meeting = typeof meetings.$inferSelect;
+export type MeetingRecording = typeof meetingRecordings.$inferSelect;

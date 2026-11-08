@@ -4,10 +4,11 @@ import type { NextFunction, Request, Response } from 'express';
 /**
  * Paths that are called straight on the Railway domain, never through Vercel, so they can't carry
  * the secret: the health check (Railway itself), biometric terminals pushing over ADMS, and the
- * office sync agent. Each has its own check: device serial/IP for ADMS, a device token for ingest.
+ * office sync agent, and LiveKit's webhooks. Each has its own check: device serial/IP for ADMS, a device
+ * token for ingest, a signature for LiveKit.
  */
 const DIRECT_EXACT = new Set(['/api/health']);
-const DIRECT_PREFIXES = ['/iclock/', '/api/ingest/'];
+const DIRECT_PREFIXES = ['/iclock/', '/api/ingest/', '/api/livekit/webhook'];
 export const isDirectPath = (path: string) => DIRECT_EXACT.has(path) || DIRECT_PREFIXES.some((p) => path.startsWith(p));
 
 function sameSecret(given: string, expected: Buffer): boolean {

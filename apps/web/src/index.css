@@ -63,3 +63,28 @@
     background: rgb(12 16 22 / 0.45);
   }
 }
+
+/* ---- Video call controls (dark call screen) ---- */
+.vo-ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 120ms;
+}
+.vo-ctl:hover { background: rgb(255 255 255 / 0.18); }
+.vo-ctl:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }
+.vo-ctl:disabled { opacity: 0.5; cursor: not-allowed; }
+.vo-ctl[aria-pressed='true'] { background: #fff; color: #0f1115; }
+.vo-ctl[data-lk-source='screen_share'][data-lk-enabled='true'] { background: #2563eb; }
+.vo-ctl[data-lk-source='microphone'][data-lk-enabled='false'] { background: #dc2626; color: #fff; }
+.vo-ctl svg { width: 1.25rem; height: 1.25rem; }
+.vo-ctl-danger { background: #dc2626; }
+.vo-ctl-danger:hover { background: #b91c1c; }
+.vo-tile { border-radius: 0.75rem; overflow: hidden; }

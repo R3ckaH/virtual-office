@@ -6,6 +6,7 @@ import { DepartmentsPage } from '@/pages/admin/DepartmentsPage';
 import { DevicesPage } from '@/pages/admin/DevicesPage';
 import { HrAttendancePage } from '@/pages/admin/HrAttendancePage';
 import { LoginHistoryPage } from '@/pages/admin/LoginHistoryPage';
+import { MeetingSettingsPage } from '@/pages/admin/MeetingSettingsPage';
 import { RoomsPage } from '@/pages/admin/RoomsPage';
 import { SchedulesPage } from '@/pages/admin/SchedulesPage';
 import { UsersPage } from '@/pages/admin/UsersPage';
@@ -16,6 +17,7 @@ import { AttendancePage } from '@/pages/attendance/AttendancePage';
 import { ComingSoonPage } from '@/pages/ComingSoonPage';
 import { FloorPage } from '@/pages/floor/FloorPage';
 import { HomePage } from '@/pages/HomePage';
+import { MeetingsPage } from '@/pages/meetings/MeetingsPage';
 import { ProfilePage } from '@/pages/settings/ProfilePage';
 
 export function App() {
@@ -28,7 +30,7 @@ export function App() {
       <Route element={<RequireAuth><AppShell /></RequireAuth>}>
         <Route index element={<HomePage />} />
         <Route path="floor" element={<FloorPage />} />
-        <Route path="meetings" element={<ComingSoonPage module="meetings" />} />
+        <Route path="meetings" element={<MeetingsPage />} />
         <Route path="chat" element={<ComingSoonPage module="chat" />} />
         <Route path="tasks" element={<ComingSoonPage module="tasks" />} />
         <Route path="attendance" element={<AttendancePage />} />
@@ -40,6 +42,7 @@ export function App() {
         <Route path="admin/schedules" element={<RequirePermission permission="attendance.manage"><SchedulesPage /></RequirePermission>} />
         <Route path="admin/devices" element={<RequirePermission permission="devices.manage"><DevicesPage /></RequirePermission>} />
         <Route path="admin/rooms" element={<RequirePermission permission="rooms.manage"><RoomsPage /></RequirePermission>} />
+        <Route path="admin/meetings" element={<RequirePermission permission="settings.manage"><MeetingSettingsPage /></RequirePermission>} />
         <Route path="admin/departments" element={<RequirePermission permission="departments.manage"><DepartmentsPage /></RequirePermission>} />
         <Route path="admin/login-history" element={<RequirePermission permission="authEvents.read"><LoginHistoryPage /></RequirePermission>} />
         <Route path="admin/audit-log" element={<RequirePermission permission="auditLogs.read"><AuditLogPage /></RequirePermission>} />

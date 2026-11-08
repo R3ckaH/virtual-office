@@ -1,4 +1,4 @@
-import type { FloorSpot, MeetingDto, Point, PresencePersonDto, RoomDto, RoomKind } from '@vo/shared';
+import type { FloorSpot, GatheringDto, Point, PresencePersonDto, RoomDto, RoomKind } from '@vo/shared';
 import { assignSeats, FLOOR, FLOOR_SPOTS, knockSpot, walkRoute } from '@vo/shared';
 import { Crown, DoorClosed, Coffee, Lock, Star, Users, Video, type LucideIcon } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -108,7 +108,7 @@ export interface FloorPlanProps {
   /** connected people (status not OFFLINE, with a room) */
   people: PresencePersonDto[];
   me: string | null;
-  meetings: MeetingDto[];
+  meetings: GatheringDto[];
   selectedId: string | null;
   knockRoomId: string | null;
   /** the room someone just let me into (between the answer and the move arriving) */
