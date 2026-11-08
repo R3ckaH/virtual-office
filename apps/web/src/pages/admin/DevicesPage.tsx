@@ -18,6 +18,7 @@ import { Alert, Badge, Button, Dialog, EmptyState, Field, Input, PageHeader, Pan
 import { useToast } from '@/components/ui/toast';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { usePublicConfig } from '@/lib/config';
 import { allTimeZones, formatRelative } from '@/lib/format';
 
 const WAYS: { c: DeviceConnection; icon: typeof Cloud; text: string; foot: string }[] = [
@@ -294,7 +295,10 @@ function DeviceDialog({ open, device, onClose, onToken }: { open: boolean; devic
 function TokenDialog({ value, onClose }: { value: { device: DeviceDto; token: string } | null; onClose: () => void }) {
   const toast = useToast();
   const d = value?.device;
-  const origin = window.location.origin;
+  // Devices connect to the API host directly (on Vercel + Railway, that's the Railway domain).
+  const apiHost = usePublicConfig().data?.deviceHost;
+  const deviceHost = apiHost ?? window.location.host;
+  const origin = apiHost ? `https://${apiHost}` : window.location.origin;
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -345,7 +349,7 @@ function TokenDialog({ value, onClose }: { value: { device: DeviceDto; token: st
               <ol className="mt-1 list-decimal space-y-1 pl-5 text-muted">
                 <li>On the device: Menu → Comm. (or Network) → Cloud Server / ADMS.</li>
                 <li>
-                  Server address: the API’s host name (for this site, <code>{window.location.host}</code> unless the API is on its own address), port 443 with HTTPS.
+                  Server address: <code>{deviceHost}</code>, port 443 with HTTPS.
                 </li>
                 <li>
                   Check the serial number in Menu → System Info matches <code>{d!.serialNumber ?? '(not set)'}</code>.

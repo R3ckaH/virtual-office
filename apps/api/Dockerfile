@@ -1,4 +1,4 @@
-# API image for Azure App Service (Linux) / Container Apps.
+# API image (Railway builds it from railway.json; any container host works).
 # Build from the repo root:  docker build -f apps/api/Dockerfile -t vo-api .
 FROM node:22-slim AS build
 WORKDIR /repo
@@ -21,5 +21,5 @@ COPY --from=build /repo/apps/api/dist ./dist
 COPY --from=build /repo/apps/api/drizzle ./drizzle
 USER node
 EXPOSE 4000
-# Apply pending migrations, then start. (Run migrations as a separate release step if you scale out.)
-CMD ["sh", "-c", "node dist/db/migrate.js && node dist/main.js"]
+# Apply pending migrations, create the first Admin if BOOTSTRAP_* is set and none exists, then start.
+CMD ["sh", "-c", "node dist/db/migrate.js && node dist/db/bootstrap.js && node dist/main.js"]

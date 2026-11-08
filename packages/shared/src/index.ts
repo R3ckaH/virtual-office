@@ -268,6 +268,9 @@ export interface PublicConfigDto {
   logoUrl: string | null;
   sessionTimeoutMinutes: number;
   ssoProviders: SsoProvider[];
+  /** Where biometric terminals and the sync agent connect (the API's own host, e.g. the Railway
+   *  domain). null when the API is served from the same host as the web app. */
+  deviceHost: string | null;
 }
 
 export interface ApiErrorBody {

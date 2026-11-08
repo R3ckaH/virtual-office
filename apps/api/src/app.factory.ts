@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { edgeGuard, noStore } from './common/edge-guard';
 import { HttpExceptionFilter } from './common/http-exception.filter';
 import { env } from './config/env';
 
@@ -13,7 +14,12 @@ export async function createApp(): Promise<INestApplication> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: e.NODE_ENV === 'test' ? ['error'] : ['log', 'warn', 'error'],
   });
-  if (e.TRUST_PROXY) app.set('trust proxy', 1); // correct client IPs behind Azure's front end
+  // Behind one reverse proxy (Railway's edge), take the client IP it adds. Requests that come
+  // through Vercel get their IP from edgeGuard instead, once the secret checks out.
+  if (e.TRUST_PROXY || e.ORIGIN_SECRET) app.set('trust proxy', 1);
+  if (e.ORIGIN_SECRET) app.use(edgeGuard(e.ORIGIN_SECRET)); // only accept traffic from the Vercel proxy
+  else if (e.NODE_ENV === 'production') console.warn('ORIGIN_SECRET is not set: the API accepts direct traffic.');
+  app.use(noStore);
   app.disable('x-powered-by');
   app.use(helmet());
   app.use(cookieParser());

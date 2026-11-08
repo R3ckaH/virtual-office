@@ -3,6 +3,7 @@ import type { PublicConfigDto } from '@vo/shared';
 import { sql } from 'drizzle-orm';
 import { SsoService } from '../auth/sso.service';
 import { Public } from '../common/auth-context';
+import { env } from '../config/env';
 import { DB, Db } from '../db/client';
 import { SettingsService } from './settings.service';
 
@@ -25,10 +26,11 @@ export class PublicController {
       logoUrl: s.logoUrl,
       sessionTimeoutMinutes: s.sessionTimeoutMinutes,
       ssoProviders: this.sso.enabledProviders(),
+      deviceHost: env().DEVICE_HOST || env().RAILWAY_PUBLIC_DOMAIN || null,
     };
   }
 
-  /** Liveness + database check for Azure App Service health probes. */
+  /** Liveness + database check for the host's health probe (Railway calls it directly). */
   @Get('health')
   async health() {
     await this.db.execute(sql`select 1`);

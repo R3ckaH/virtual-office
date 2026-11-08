@@ -25,7 +25,7 @@ This repository is being built in seven phases. **Phase 2 (this release): clock 
 | Auth | Built in: argon2id passwords, TOTP 2-step sign-in, Google/Microsoft OIDC |
 | Tests | Jest + Supertest against a real PostgreSQL (API), Vitest + Testing Library (web) |
 | CI | GitHub Actions |
-| Hosting target | Azure App Service (API), Azure Static Web Apps (web), Azure Database for PostgreSQL |
+| Hosting | Vercel (web, proxies `/api`), Railway (API container + PostgreSQL) |
 
 > **Change from the approved plan:** the data layer uses Drizzle ORM instead of Prisma. Drizzle is pure TypeScript (no separate query-engine binary to download at build/run time), generates plain SQL migrations you can review, and keeps queries close to SQL, which suits the reporting work in Phase 7. The data model itself is unchanged.
 
@@ -116,14 +116,16 @@ Docker Compose creates the `vo_test` database for you (or point `TEST_DATABASE_U
 | `pnpm db:reset` | Drop everything, migrate, seed (development only) |
 | `pnpm --filter @vo/api db:generate` | Create a migration after editing `src/db/schema.ts` |
 
-## Deploying to Azure (outline)
+## Deploying (Vercel + Railway)
 
-1. **Database:** Azure Database for PostgreSQL Flexible Server (require SSL; add `?sslmode=require` to `DATABASE_URL`).
-2. **API:** build `apps/api/Dockerfile` and run it on App Service for Containers. The container applies migrations on start. Set every variable from `.env.example` as App Settings (secrets from Key Vault), `NODE_ENV=production`, `TRUST_PROXY=1`, and turn on **HTTPS Only**. Health probe: `/api/health`.
-3. **Web:** deploy `apps/web/dist` to Azure Static Web Apps and link the API as its backend so `/api/*` is served from the same origin. That keeps the session cookies `SameSite=Strict` and avoids CORS. `public/staticwebapp.config.json` sets HSTS, CSP and SPA routing.
-4. **Biometric cloud push:** devices call `https://<api-host>/iclock/...` on the **API's own host** (not the Static Web App), because the path is fixed in the device firmware. Set each device's "Cloud server" to the API host on port 443, register its serial number in Biometric devices, and preferably restrict it to the office's public IP.
-5. **Email:** point `SMTP_*` at Azure Communication Services Email (or SendGrid).
-6. **SSO (optional):** register apps in Google Cloud and Microsoft Entra with redirect URIs `https://<api-host>/api/auth/sso/google/callback` and `.../microsoft/callback`, then set the client ids/secrets.
+The web app runs on Vercel and forwards `/api/*` to the API on Railway, so the browser sees one site and the session cookies stay `SameSite=Strict`. The API refuses traffic that didn't come through Vercel, except the health check and device traffic (biometric push and the sync agent), which go straight to Railway with their own checks. Step-by-step setup, including creating the first Admin: **[docs/deploy-vercel-railway.md](docs/deploy-vercel-railway.md)**.
+
+| File | Purpose |
+|---|---|
+| `apps/web/vercel.json` | Build settings, `/api` proxy (adds `x-origin-secret`), security headers and CSP, SPA routing |
+| `railway.json` | Builds `apps/api/Dockerfile`, health check `/api/health` |
+| `apps/api/src/common/edge-guard.ts` | Checks `ORIGIN_SECRET`, takes the client IP from Vercel's headers, sets `Cache-Control: no-store` |
+| `apps/api/src/db/bootstrap.ts` | Creates the first Admin from `BOOTSTRAP_*` variables on first start |
 
 ## Privacy (RA 10173)
 

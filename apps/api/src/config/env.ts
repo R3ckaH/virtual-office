@@ -32,6 +32,15 @@ const envSchema = z.object({
   MICROSOFT_CLIENT_SECRET: z.string().optional().default(''),
   MICROSOFT_TENANT: z.string().default('organizations'),
   TRUST_PROXY: bool.default(false),
+  /** host devices connect to directly; defaults to Railway's public domain */
+  DEVICE_HOST: z.string().optional().default(''),
+  RAILWAY_PUBLIC_DOMAIN: z.string().optional().default(''),
+  /** shared with the Vercel proxy; when set, requests without it are refused (except /api/health) */
+  ORIGIN_SECRET: z
+    .string()
+    .optional()
+    .default('')
+    .refine((v) => v === '' || v.length >= 32, 'ORIGIN_SECRET must be at least 32 characters'),
 });
 
 export type Env = z.infer<typeof envSchema>;
