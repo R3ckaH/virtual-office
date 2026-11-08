@@ -30,9 +30,14 @@ Never change `DATA_ENCRYPTION_KEY` after launch: it encrypts everyone's 2-step s
 
 ## 2. Railway: database and API
 
-1. **New Project → Deploy from GitHub repo**, choose the repository. Railway reads `railway.json` at the repo root and builds `apps/api/Dockerfile`. Leave the service's Root Directory empty (the build needs the whole repo).
+1. **New Project → Deploy from GitHub repo**, choose the repository. Railway detects the monorepo and offers a service per app: keep `@vo/api` and delete `@vo/web` (the web app goes on Vercel). Leave the service's Root Directory empty (the build needs the whole repo).
+   Railway no longer reads `railway.json` for new services, so set these in the API service's **Settings** (the file in the repo records the same values):
+   - **Builder:** Dockerfile, **Dockerfile Path** `/apps/api/Dockerfile`
+   - **Custom Build Command** and **Custom Start Command:** empty (Railway pre-fills pnpm commands; remove them, the Dockerfile does both)
+   - **Watch Paths:** `/apps/api/**`, `/packages/shared/**`, `/pnpm-lock.yaml`
+   - **Healthcheck Path:** `/api/health`
 2. In the same project: **+ New → Database → PostgreSQL**.
-3. Open the API service → **Settings**: set the region to Singapore, and under **Networking** click **Generate Domain**. You get something like `vo-api-production.up.railway.app`. Write it down.
+3. Set the region to **Southeast Asia (Singapore)** on both the API and the Postgres service (Settings → Scale), and on the API under **Networking** click **Generate Domain** with target port `8080`. You get something like `voapi-production-xxxx.up.railway.app`. Write it down.
 4. API service → **Variables**. Add:
 
    | Variable | Value |
@@ -51,7 +56,7 @@ Never change `DATA_ENCRYPTION_KEY` after launch: it encrypts everyone's 2-step s
    | `BOOTSTRAP_ADMIN_NAME` | your name |
    | `BOOTSTRAP_ADMIN_PASSWORD` | a strong password (12+ characters) |
 
-   Railway provides `PORT` itself; don't set it.
+   Also add `PORT` = `8080`, matching the domain's target port.
 
 5. Deploy. On start the container applies database migrations, creates the first Admin from the `BOOTSTRAP_*` variables (only if no Admin exists yet), and starts the API. The deploy turns green once `/api/health` answers.
 6. Check: `https://<railway domain>/api/health` shows `{"status":"ok"}`, and `https://<railway domain>/api/config` shows **403**. That 403 is correct: direct access is blocked.
