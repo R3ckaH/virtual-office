@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Laptop, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TimeClockCard } from '@/components/attendance/TimeClockCard';
+import { AnnouncementsCard } from '@/components/chat/AnnouncementsCard';
 import { OfficeNowCard } from '@/components/presence/OfficeNowCard';
 import { Badge, Panel } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -28,6 +29,8 @@ export function HomePage() {
           {greeting(u.timezone)}, {u.fullName.split(' ')[0]}.
         </h1>
       </div>
+
+      <AnnouncementsCard />
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <TimeClockCard />

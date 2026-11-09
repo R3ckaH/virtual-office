@@ -4,13 +4,17 @@
  * Phase 2: schedules, punches (web + biometric), computed attendance days, exceptions, corrections, devices.
  * Phase 3: office floor rooms, room members, presence (room, chosen status, last seen).
  * Phase 4: meetings (scheduled, instant, room calls), invitees, attendance, reminders, recordings, calendar feeds.
+ * Phase 5: chat channels, members (read state), messages, reactions, files (stored in the database).
  * All timestamps are `timestamptz` (stored in UTC). Tables/columns use snake_case.
  * Generate a migration after editing: `pnpm --filter @vo/api db:generate`
  */
 import { relations, sql } from 'drizzle-orm';
 import {
   AnyPgColumn,
+  bigserial,
+  bigint,
   boolean,
+  customType,
   date,
   index,
   integer,
@@ -25,6 +29,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import {
   AUTH_EVENT_TYPES,
+  CHANNEL_KINDS,
   CORRECTION_ACTIONS,
   CORRECTION_STATUSES,
   DAY_OVERRIDE_KINDS,
@@ -78,6 +83,7 @@ export const meetingStatusEnum = pgEnum('meeting_status', MEETING_STATUSES);
 export const recurrenceEnum = pgEnum('recurrence', RECURRENCES);
 export const rsvpEnum = pgEnum('rsvp', RSVPS);
 export const recordingStatusEnum = pgEnum('recording_status', RECORDING_STATUSES);
+export const channelKindEnum = pgEnum('channel_kind', CHANNEL_KINDS);
 export const preferSourceEnum = pgEnum('prefer_source', ['WEB', 'DEVICE']);
 
 /** Single-row table of company-wide settings (id is always 1). */
@@ -673,6 +679,113 @@ export const calendarFeeds = pgTable('calendar_feeds', {
   tokenEnc: text('token_enc').notNull(),
   createdAt: createdAt(),
 });
+
+/* ---------------- Phase 5: chat ---------------- */
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => 'bytea' });
+
+export const channels = pgTable(
+  'channels',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    kind: channelKindEnum('kind').notNull(),
+    name: text('name'),
+    description: text('description'),
+    isPrivate: boolean('is_private').notNull().default(false),
+    departmentId: uuid('department_id').references(() => departments.id, { onDelete: 'cascade' }),
+    /** DMs and group messages: the sorted member ids, so the same people always get the same conversation */
+    dmKey: text('dm_key'),
+    createdById: uuid('created_by_id').references(() => users.id, { onDelete: 'set null' }),
+    lastSeq: bigint('last_seq', { mode: 'number' }).notNull().default(0),
+    lastMessageAt: ts('last_message_at'),
+    archivedAt: ts('archived_at'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    uniqueIndex('channels_dm_key_uq').on(t.dmKey),
+    uniqueIndex('channels_department_uq').on(t.departmentId).where(sql`kind = 'DEPARTMENT'`),
+    uniqueIndex('channels_announcements_uq').on(t.kind).where(sql`kind = 'ANNOUNCEMENTS'`),
+  ],
+);
+
+export const channelMembers = pgTable(
+  'channel_members',
+  {
+    channelId: uuid('channel_id')
+      .notNull()
+      .references(() => channels.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    lastReadSeq: bigint('last_read_seq', { mode: 'number' }).notNull().default(0),
+    joinedAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.channelId, t.userId] }), index('channel_members_user_idx').on(t.userId)],
+);
+
+export const messages = pgTable(
+  'messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** global, increasing: orders messages and counts unread */
+    seq: bigserial('seq', { mode: 'number' }).notNull().unique(),
+    channelId: uuid('channel_id')
+      .notNull()
+      .references(() => channels.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'set null' }),
+    body: text('body').notNull().default(''),
+    mentionIds: uuid('mention_ids').array().notNull().default(sql`'{}'::uuid[]`),
+    clientId: text('client_id'),
+    editedAt: ts('edited_at'),
+    deletedAt: ts('deleted_at'),
+    pinnedAt: ts('pinned_at'),
+    pinnedById: uuid('pinned_by_id').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('messages_channel_seq_idx').on(t.channelId, t.seq),
+    uniqueIndex('messages_client_id_uq').on(t.authorId, t.clientId),
+    index('messages_mentions_idx').using('gin', t.mentionIds),
+    index('messages_search_idx').using('gin', sql`to_tsvector('simple', ${t.body})`),
+    index('messages_pinned_idx').on(t.channelId).where(sql`pinned_at IS NOT NULL AND deleted_at IS NULL`),
+  ],
+);
+
+export const messageReactions = pgTable(
+  'message_reactions',
+  {
+    messageId: uuid('message_id')
+      .notNull()
+      .references(() => messages.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    emoji: text('emoji').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.messageId, t.userId, t.emoji] })],
+);
+
+/** Files shared in chat. Uploaded first (no message yet), then attached when the message is sent. */
+export const chatFiles = pgTable(
+  'chat_files',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    messageId: uuid('message_id').references(() => messages.id, { onDelete: 'cascade' }),
+    uploaderId: uuid('uploader_id').references(() => users.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    contentType: text('content_type').notNull(),
+    size: integer('size').notNull(),
+    sha256: text('sha256').notNull(),
+    data: bytea('data').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('chat_files_message_idx').on(t.messageId)],
+);
+
+export type Channel = typeof channels.$inferSelect;
+export type Message = typeof messages.$inferSelect;
 
 /* ---------------- relations (for the relational query API) ---------------- */
 

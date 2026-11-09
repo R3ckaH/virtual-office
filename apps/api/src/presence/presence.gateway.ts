@@ -151,5 +151,6 @@ export class PresenceGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     on('summon:send', summonSchema, (i) => this.presence.summon(me(), i.roomId, i.userIds));
     on('summon:answer', answerSchema, (i) => this.presence.answerSummon(me(), i.id, i.accept));
     on('meeting:end', endMeetingSchema, (i) => this.presence.endMeeting(me(), i.roomId));
+    for (const h of this.presence.clientHandlers) on(h.event, h.schema, (i) => h.fn(me(), i));
   }
 }

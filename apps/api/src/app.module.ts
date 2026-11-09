@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AttendanceModule } from './attendance/attendance.module';
 import { AdminLogsController } from './audit/admin-logs.controller';
 import { DevicesModule } from './devices/devices.module';
+import { ChatModule } from './chat/chat.module';
 import { MeetingsModule } from './meetings/meetings.module';
 import { PresenceModule } from './presence/presence.module';
 import { AuthController } from './auth/auth.controller';
@@ -26,6 +27,7 @@ import { UsersService } from './users/users.service';
     DevicesModule,
     PresenceModule,
     MeetingsModule,
+    ChatModule,
     // Global default; auth endpoints use a stricter per-route limit. Swap to Redis storage when scaling out.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 600 }]),
   ],

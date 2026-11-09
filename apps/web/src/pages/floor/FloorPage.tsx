@@ -1,4 +1,4 @@
-import type { PresencePersonDto, PresenceStatus, RoomDto } from '@vo/shared';
+import type { ChannelDto, PresencePersonDto, PresenceStatus, RoomDto } from '@vo/shared';
 import { IDLE_AWAY_MINUTES, PRESENCE_LABELS, PRESENCE_STATUSES, ROOM_KIND_LABELS, roomAccess } from '@vo/shared';
 import { clsx } from 'clsx';
 import { BellRing, DoorOpen, MessageSquare, Phone, Video, X } from 'lucide-react';
@@ -8,6 +8,8 @@ import { StatusDot } from '@/components/presence/StatusDot';
 import { Alert, Button, Dialog, PageHeader, Panel, Spinner } from '@/components/ui';
 import { Avatar } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/toast';
+import { useNavigate } from 'react-router-dom';
+import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useCalls } from '@/lib/calls';
 import { cityOf, formatRelative, formatTime } from '@/lib/format';
@@ -300,9 +302,7 @@ function PersonCard({
               {access === 'knock' ? `Knock on ${room.name}` : `Go to ${room.name}`}
             </Button>
           )}
-          <Button size="sm" variant="secondary" disabled title="Chat arrives in Phase 5">
-            <MessageSquare className="h-4 w-4" aria-hidden /> Message
-          </Button>
+          <MessageButton userId={p.userId} />
           <Button
             size="sm"
             variant="secondary"
@@ -316,8 +316,30 @@ function PersonCard({
         </div>
       )}
       {!isMe && online && p.status === 'BUSY' && <p className="mt-2 text-xs text-muted">{p.fullName.split(' ')[0]} is busy. Call only if it can’t wait.</p>}
-      {!isMe && <p className="mt-2 text-xs text-muted">Messages arrive with Chat.</p>}
     </Panel>
+  );
+}
+
+/** Opens (or starts) your direct conversation with this person. */
+function MessageButton({ userId }: { userId: string }) {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  return (
+    <Button
+      size="sm"
+      variant="secondary"
+      loading={busy}
+      onClick={() => {
+        setBusy(true);
+        api<ChannelDto>('/chat/dms', { method: 'POST', json: { userIds: [userId] } })
+          .then((c) => navigate(`/chat/${c.id}`))
+          .catch((e) => toast(e instanceof ApiError ? e.message : 'Couldn’t open the conversation.', 'danger'))
+          .finally(() => setBusy(false));
+      }}
+    >
+      <MessageSquare className="h-4 w-4" aria-hidden /> Message
+    </Button>
   );
 }
 

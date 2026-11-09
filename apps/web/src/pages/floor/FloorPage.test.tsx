@@ -125,7 +125,7 @@ describe('Office floor', () => {
     await userEvent.click(screen.getByRole('button', { name: /^Emily Carter, Away/ }));
     expect(screen.getByText('Late shift', { selector: 'dd' })).toBeInTheDocument();
     expect(screen.getByText(/in New York/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Message/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Message/ })).toBeEnabled();
     expect(screen.getByRole('button', { name: /^Call$/ })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Go to Sales' })).toBeInTheDocument();
   });

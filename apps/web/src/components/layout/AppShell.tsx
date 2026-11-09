@@ -42,6 +42,7 @@ import { StatusMenu } from '@/components/presence/StatusMenu';
 import { PresenceProvider } from '@/lib/presence';
 import { CallsProvider, useCalls } from '@/lib/calls';
 import { CallPrompts } from '@/components/meetings/CallPrompts';
+import { attentionCount, ChatLive, useChannels } from '@/lib/chat';
 import { IdleGuard } from './IdleGuard';
 
 interface NavItem {
@@ -51,13 +52,15 @@ interface NavItem {
   permission?: Permission;
   /** release phase for modules that aren't built yet */
   phase?: number;
+  /** live count shown next to the label */
+  badge?: 'chat';
 }
 
 const WORK: NavItem[] = [
   { to: '/', label: 'Home', icon: Home },
   { to: '/floor', label: 'Office Floor', icon: Building2 },
   { to: '/meetings', label: 'Meetings', icon: Video },
-  { to: '/chat', label: 'Chat', icon: MessageSquare, phase: 5 },
+  { to: '/chat', label: 'Chat', icon: MessageSquare, badge: 'chat' },
   { to: '/tasks', label: 'Tasks', icon: ListChecks, phase: 6 },
   { to: '/attendance', label: 'Attendance', icon: Clock },
   { to: '/leave', label: 'Leave', icon: CalendarDays, phase: 6 },
@@ -75,6 +78,17 @@ const ADMIN: NavItem[] = [
   { to: '/admin/login-history', label: 'Login history', icon: KeyRound, permission: 'authEvents.read' },
   { to: '/admin/audit-log', label: 'Audit log', icon: FileClock, permission: 'auditLogs.read' },
 ];
+
+function ChatBadge() {
+  const { data } = useChannels();
+  const n = attentionCount(data);
+  if (!n) return null;
+  return (
+    <span className="rounded-full bg-danger px-1.5 text-2xs font-bold leading-[18px] text-white" aria-label={`${n} unread`}>
+      {n > 99 ? '99+' : n}
+    </span>
+  );
+}
 
 // LiveKit is a large download: load it the first time you join a call.
 const CallScreen = lazy(() => import('@/components/meetings/CallScreen').then((m) => ({ default: m.CallScreen })));
@@ -111,6 +125,7 @@ function NavGroup({ label, items, onNavigate }: { label?: string; items: NavItem
           <item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden />
           <span className="flex-1">{item.label}</span>
           {item.phase && <span className="text-2xs font-normal text-rail-ink/50">Soon</span>}
+          {item.badge === 'chat' && <ChatBadge />}
         </NavLink>
       ))}
     </div>
@@ -284,13 +299,14 @@ export function AppShell({ children }: { children?: ReactNode }) {
             <UserMenu />
           </div>
         </header>
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl px-4 py-6 outline-none sm:px-6 lg:py-8">
+        <main id="main" tabIndex={-1} className={clsx('outline-none', location.pathname.startsWith('/chat') ? 'w-full' : 'mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:py-8')}>
           {children ?? <Outlet />}
         </main>
       </div>
       <IdleGuard />
       <PresencePrompts />
       <CallPrompts />
+      <ChatLive />
     </div>
     <CallLayer />
     </CallsProvider>

@@ -1,5 +1,6 @@
 import { HttpStatus, Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import {
+  ClientEvents,
   assignSeats,
   deriveStatus,
   FloorSnapshotDto,
@@ -12,6 +13,7 @@ import {
   ServerEvents,
   SummonDto,
 } from '@vo/shared';
+import type { ZodType } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { eq, inArray } from 'drizzle-orm';
 import { ClockService } from '../attendance/clock.service';
@@ -132,6 +134,13 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
 
   attach(outbox: PresenceOutbox) {
     this.outbox = outbox;
+  }
+
+  /** Extra client → server socket events handled by other modules (e.g. chat typing). */
+  readonly clientHandlers: { event: keyof ClientEvents; schema: ZodType<unknown>; fn: (userId: string, input: unknown) => unknown }[] = [];
+
+  onClientEvent<T>(event: keyof ClientEvents, schema: ZodType<T>, fn: (userId: string, input: T) => unknown) {
+    this.clientHandlers.push({ event, schema: schema as ZodType<unknown>, fn: fn as (userId: string, input: unknown) => unknown });
   }
 
   /* ---------------- loading ---------------- */

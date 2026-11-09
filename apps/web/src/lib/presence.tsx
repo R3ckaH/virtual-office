@@ -41,7 +41,19 @@ export interface PresenceState {
 }
 
 /** Server events other parts of the app (calls, meetings) can listen to. */
-const FORWARDED = ['call:incoming', 'call:ended', 'meeting:reminder', 'meetings:changed'] as const;
+const FORWARDED = [
+  'call:incoming',
+  'call:ended',
+  'meeting:reminder',
+  'meetings:changed',
+  'chat:message',
+  'chat:message-updated',
+  'chat:message-deleted',
+  'chat:channel',
+  'chat:read',
+  'chat:typing',
+  'chat:pins',
+] as const;
 export type ForwardedEvent = (typeof FORWARDED)[number];
 
 const empty: PresenceState = {

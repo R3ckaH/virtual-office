@@ -50,16 +50,24 @@ export function readCookie(name: string): string {
 /** Codes meaning "this session is over": don't try to refresh, send the user to sign in. */
 const TERMINAL = new Set(['SESSION_TIMEOUT', 'FORCED_LOGOUT', 'SESSION_ENDED', 'ACCOUNT_DEACTIVATED']);
 
-async function raw(path: string, init: RequestInit & { json?: unknown } = {}): Promise<Response> {
+type Init = RequestInit & {
+  json?: unknown;
+  /** call the API on another origin (the API's own domain, e.g. for large uploads); no cookies are sent */
+  base?: string;
+};
+
+async function raw(path: string, init: Init = {}): Promise<Response> {
   const headers = new Headers(init.headers);
   if (init.json !== undefined) headers.set('content-type', 'application/json');
   if (accessToken) headers.set('authorization', `Bearer ${accessToken}`);
   const csrf = readCookie('vo_csrf');
   if (csrf) headers.set('x-csrf-token', csrf);
-  return fetch(`/api${path}`, {
-    ...init,
+  const { base, json: _json, ...rest } = init;
+  void _json;
+  return fetch(`${base ?? ''}/api${path}`, {
+    ...rest,
     headers,
-    credentials: 'same-origin',
+    credentials: base ? 'omit' : 'same-origin',
     body: init.json !== undefined ? JSON.stringify(init.json) : init.body,
   });
 }
@@ -75,7 +83,7 @@ async function toError(res: Response): Promise<ApiError> {
 }
 
 /** JSON request with automatic access-token renewal. */
-export async function api<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
+export async function api<T>(path: string, init: Init = {}): Promise<T> {
   let res = await raw(path, init);
   if (res.status === 401) {
     const err = await toError(res.clone());

@@ -5,6 +5,7 @@ export * from './time';
 export * from './attendance';
 export * from './presence';
 export * from './meetings';
+export * from './chat';
 
 /* ------------------------------------------------------------------ */
 /* Roles                                                               */
@@ -300,13 +301,14 @@ export const PERMISSIONS = [
   'settings.manage',
   'rooms.manage', // office floor rooms: names, types, owners, members
   'meetings.schedule', // put meetings on the calendar and invite people (everyone can make instant calls)
+  'chat.channels', // create custom chat channels (everyone can message and join public channels)
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ADMIN: PERMISSIONS,
-  HR: ['users.read', 'attendance.manage', 'devices.manage', 'reports.read', 'meetings.schedule'],
-  MANAGER: ['users.read', 'team.read', 'reports.read', 'meetings.schedule'],
+  HR: ['users.read', 'attendance.manage', 'devices.manage', 'reports.read', 'meetings.schedule', 'chat.channels'],
+  MANAGER: ['users.read', 'team.read', 'reports.read', 'meetings.schedule', 'chat.channels'],
   EMPLOYEE: [],
 };
 

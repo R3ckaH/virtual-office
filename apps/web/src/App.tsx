@@ -17,6 +17,7 @@ import { AttendancePage } from '@/pages/attendance/AttendancePage';
 import { ComingSoonPage } from '@/pages/ComingSoonPage';
 import { FloorPage } from '@/pages/floor/FloorPage';
 import { HomePage } from '@/pages/HomePage';
+import { ChatPage } from '@/pages/chat/ChatPage';
 import { MeetingsPage } from '@/pages/meetings/MeetingsPage';
 import { ProfilePage } from '@/pages/settings/ProfilePage';
 
@@ -31,7 +32,8 @@ export function App() {
         <Route index element={<HomePage />} />
         <Route path="floor" element={<FloorPage />} />
         <Route path="meetings" element={<MeetingsPage />} />
-        <Route path="chat" element={<ComingSoonPage module="chat" />} />
+        <Route path="chat" element={<ChatPage />} />
+        <Route path="chat/:channelId" element={<ChatPage />} />
         <Route path="tasks" element={<ComingSoonPage module="tasks" />} />
         <Route path="attendance" element={<AttendancePage />} />
         <Route path="leave" element={<ComingSoonPage module="leave" />} />

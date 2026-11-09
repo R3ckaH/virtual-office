@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { ChatServerEvents } from './chat';
+import type { typingSchema } from './chat';
 
 /* ------------------------------------------------------------------ */
 /* Presence statuses                                                   */
@@ -336,6 +338,7 @@ export const endMeetingSchema = z.object({ roomId: id });
 
 /** Client → server event names and payloads. */
 export interface ClientEvents {
+  'chat:typing': z.input<typeof typingSchema>;
   'room:enter': z.input<typeof enterRoomSchema>;
   'status:set': z.input<typeof setStatusSchema>;
   'activity:idle': z.input<typeof idleSchema>;
@@ -370,6 +373,8 @@ export interface ServerEvents {
   /** a meeting you're in was created, changed or cancelled (refresh the calendar) */
   'meetings:changed': { meetingId: string };
 }
+
+export interface ServerEvents extends ChatServerEvents {}
 
 /** Socket.IO-style listener maps (for typing `io()` / `Server`). */
 export type ServerEventListeners = { [K in keyof ServerEvents]: (data: ServerEvents[K]) => void };

@@ -2,7 +2,7 @@
 
 A web-based virtual office for a remote team: clock in and out, see who's around on an office floor, meet over video, chat, and give managers a clear view of attendance.
 
-This repository is being built in seven phases. **Phase 4 (this release): meetings, video calls and the calendar** (on top of presence and the office floor from Phase 3).
+This repository is being built in seven phases. **Phase 5 (this release): team chat and announcements** (on top of meetings and video from Phase 4).
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -60,6 +60,7 @@ docs/
   phase-2.md      the same for Phase 2 (attendance and biometric sync)
   phase-3.md      the same for Phase 3 (presence and the office floor)
   phase-4.md      the same for Phase 4 (meetings, calls, calendar, LiveKit setup)
+  phase-5.md      the same for Phase 5 (chat, announcements, files)
 ```
 
 ## Run it locally
@@ -107,7 +108,7 @@ pnpm test                 # API unit + e2e, web component tests
 pnpm typecheck
 ```
 
-Docker Compose creates the `vo_test` database for you (or point `TEST_DATABASE_URL` elsewhere). The API end-to-end suite rebuilds it from the migrations on every run, then exercises real HTTP requests: login, lockout, refresh-token rotation and reuse detection, inactivity timeout, force logout, 2-step sign-in, password reset, and the role check on every admin endpoint. Phase 2 adds the attendance rules engine (unit), and end-to-end runs of the web clock, ADMS cloud push, sync-agent upload, file import, exceptions, the two-step correction approval and the minute job, on a frozen clock. Phase 3 adds the presence rules (unit) and end-to-end runs over real Socket.IO connections: sign-in on connect, rooms and access, knocks, summons, idle and chosen statuses, timesheet breaks moving people to the break room, force-logout ending the live connection, and room admin. Phase 4 adds occurrence and .ics rules (unit) and end-to-end runs of scheduling, invites, RSVPs, join tokens, signed LiveKit webhooks (attendance and "In a meeting"), ringing, room calls, reminders and the calendar feed.
+Docker Compose creates the `vo_test` database for you (or point `TEST_DATABASE_URL` elsewhere). The API end-to-end suite rebuilds it from the migrations on every run, then exercises real HTTP requests: login, lockout, refresh-token rotation and reuse detection, inactivity timeout, force logout, 2-step sign-in, password reset, and the role check on every admin endpoint. Phase 2 adds the attendance rules engine (unit), and end-to-end runs of the web clock, ADMS cloud push, sync-agent upload, file import, exceptions, the two-step correction approval and the minute job, on a frozen clock. Phase 3 adds the presence rules (unit) and end-to-end runs over real Socket.IO connections: sign-in on connect, rooms and access, knocks, summons, idle and chosen statuses, timesheet breaks moving people to the break room, force-logout ending the live connection, and room admin. Phase 4 adds occurrence and .ics rules (unit) and end-to-end runs of scheduling, invites, RSVPs, join tokens, signed LiveKit webhooks (attendance and "In a meeting"), ringing, room calls, reminders and the calendar feed. Phase 5 adds message formatting rules (unit) and end-to-end runs of channels, direct messages, unread and mention counts, edits, reactions, pins, file uploads with signed links, search and live delivery.
 
 ## Useful scripts
 
