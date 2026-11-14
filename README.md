@@ -128,7 +128,7 @@ The web app runs on Vercel and forwards `/api/*` to the API on Railway, so the b
 
 | File | Purpose |
 |---|---|
-| `apps/web/vercel.json` | Build settings, `/api` proxy (adds `x-origin-secret`), security headers and CSP, SPA routing |
+| `apps/web/vercel.ts` | Build settings, `/api` proxy to `API_UPSTREAM` (adds `x-origin-secret`), security headers and CSP, SPA routing |
 | `railway.json` | Records the Railway service settings (Dockerfile build, health check). New Railway services ignore it; the deploy guide lists the same settings for the dashboard |
 | `apps/api/src/common/edge-guard.ts` | Checks `ORIGIN_SECRET`, takes the client IP from Vercel's headers, sets `Cache-Control: no-store` |
 | `apps/api/src/db/bootstrap.ts` | Creates the first Admin from `BOOTSTRAP_*` variables on first start |

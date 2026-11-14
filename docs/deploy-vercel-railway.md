@@ -51,7 +51,8 @@ Never change `DATA_ENCRYPTION_KEY` after launch: it encrypts everyone's 2-step s
    | `ORIGIN_SECRET` | from step 1 |
    | `TRUST_PROXY` | `0` (the secret check reads the real client IP itself) |
    | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` | your mail provider, for invites and password resets |
-   | `BOOTSTRAP_COMPANY_NAME` | `Covenant Creators` |
+   | `BOOTSTRAP_COMPANY_NAME` | the company's name |
+   | `MODULES` | optional: which optional modules this copy has (see `docs/new-customer.md`) |
    | `BOOTSTRAP_ADMIN_EMAIL` | your email |
    | `BOOTSTRAP_ADMIN_NAME` | your name |
    | `BOOTSTRAP_ADMIN_PASSWORD` | a strong password (12+ characters) |
@@ -63,11 +64,11 @@ Never change `DATA_ENCRYPTION_KEY` after launch: it encrypts everyone's 2-step s
 
 ## 3. Vercel: the web app
 
-1. Edit `apps/web/vercel.json`: replace `REPLACE-WITH-YOUR-API.up.railway.app` with your Railway domain from step 2.3. Commit and push.
+1. Nothing to edit in the code: the API address is a Vercel variable (step 3).
 2. Vercel → **Add New → Project**, import the same repository.
    - **Root Directory:** `apps/web`
-   - Framework, install, build and output settings come from `vercel.json`; leave the overrides off.
-3. **Environment Variables:** add `ORIGIN_SECRET` with the same value as on Railway (Production, and Preview if you use preview deployments).
+   - Framework, install, build and output settings come from `vercel.ts`; leave the overrides off.
+3. **Environment Variables:** add `API_UPSTREAM` with your Railway address from step 2.3 (`https://…up.railway.app`, no trailing slash) and `ORIGIN_SECRET` with the same value as on Railway (Production, and Preview if you use preview deployments). The first office's project may leave `API_UPSTREAM` unset.
 4. Deploy. Your domain is shown at the end, e.g. `covenant-office.vercel.app`. To use your own domain: **Settings → Domains**.
 5. Back on Railway, set `WEB_ORIGIN` and `API_ORIGIN` to that exact domain (with `https://`, no trailing slash). Railway redeploys.
 
