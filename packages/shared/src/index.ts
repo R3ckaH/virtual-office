@@ -296,6 +296,28 @@ export interface PublicConfigDto {
   deviceHost: string | null;
   /** where the browser opens the live (Socket.IO) connection; null = this site */
   realtimeUrl: string | null;
+  /** optional modules switched on for this copy of the office */
+  modules: ModuleKey[];
+}
+
+/**
+ * Optional modules. Each copy of the office (one per company) switches them on or off with the
+ * MODULES variable on the API: a comma-separated list, e.g. `MODULES=devices`. When MODULES is not
+ * set, the modules marked `defaultOn` are on. A module that is off disappears from the menus and
+ * its API answers 404.
+ */
+export const MODULES = {
+  devices: { label: 'Biometric devices', defaultOn: true },
+} as const satisfies Record<string, { label: string; defaultOn: boolean }>;
+export type ModuleKey = keyof typeof MODULES;
+export const MODULE_KEYS = Object.keys(MODULES) as ModuleKey[];
+
+/** Reads a MODULES value. Unknown names are returned separately so the caller can refuse to start. */
+export function parseModules(value: string | undefined | null): { enabled: ModuleKey[]; unknown: string[] } {
+  if (value === undefined || value === null) return { enabled: MODULE_KEYS.filter((k) => MODULES[k].defaultOn), unknown: [] };
+  const names = value.split(',').map((n) => n.trim().toLowerCase()).filter(Boolean);
+  const unknown = names.filter((n) => !(n in MODULES));
+  return { enabled: MODULE_KEYS.filter((k) => names.includes(k)), unknown: [...new Set(unknown)] };
 }
 
 export interface ApiErrorBody {

@@ -49,9 +49,21 @@ describe('first-admin bootstrap', () => {
     expect(rows[0].password_hash).toMatch(/^\$argon2id\$/);
     expect((await pool.query('select company_name from org_settings where id = 1')).rows[0].company_name).toBe('Covenant Creators');
     expect((await pool.query("select 1 from audit_logs where action = 'system.bootstrap_admin'")).rowCount).toBe(1);
+    // a new copy starts with neutral room names
+    const names = (await pool.query('select name from rooms')).rows.map((r) => r.name);
+    expect(names).toEqual(expect.arrayContaining(['Director’s office', 'Leadership room', 'Lobby']));
+    expect(names.join()).not.toMatch(/Pastor|CEO/);
 
     expect(await bootstrap({ ...base, BOOTSTRAP_ADMIN_EMAIL: 'someone.else@covenant.test' })).toBe('exists');
     expect((await pool.query('select 1 from users')).rowCount).toBe(1);
+  });
+
+  it('keeps room names an office already changed, and never renames on a later start', async () => {
+    await pool.query("update rooms set name = 'Founders' where spot = 'ceo'");
+    expect(await bootstrap(base)).toBe('created');
+    await pool.query("update rooms set name = 'CEO Strategy Room' where spot = 'ceo'");
+    expect(await bootstrap(base)).toBe('exists');
+    expect((await pool.query("select name from rooms where spot = 'ceo'")).rows[0].name).toBe('CEO Strategy Room');
   });
 
   it('rejects a weak password before touching the database', async () => {

@@ -10,10 +10,15 @@
  */
 import 'dotenv/config';
 import { passwordSchema } from '@vo/shared';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { hashPassword } from '../auth/auth.service';
 import { createDb, createPool } from './client';
-import { auditLogs, orgSettings, users } from './schema';
+import { auditLogs, orgSettings, rooms, users } from './schema';
+
+const STARTER_ROOM_NAMES = [
+  ['pastor', "Senior Pastor's office", 'Director’s office'],
+  ['ceo', 'CEO Strategy Room', 'Leadership room'],
+] as const;
 
 export async function bootstrap(e: NodeJS.ProcessEnv = process.env): Promise<'skipped' | 'exists' | 'created'> {
   const email = e.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
@@ -37,6 +42,12 @@ export async function bootstrap(e: NodeJS.ProcessEnv = process.env): Promise<'sk
         .insert(orgSettings)
         .values({ id: 1, ...(company ? { companyName: company } : {}) })
         .onConflictDoUpdate({ target: orgSettings.id, set: company ? { companyName: company } : { id: 1 } });
+
+      // A new copy starts with neutral room names (the first office's names came with the floor plan).
+      // Only rooms still carrying those original names are touched; Admins rename them under Office rooms.
+      for (const [spot, from, to] of STARTER_ROOM_NAMES) {
+        await tx.update(rooms).set({ name: to }).where(and(eq(rooms.spot, spot), eq(rooms.name, from)));
+      }
 
       const [row] = await tx
         .insert(users)

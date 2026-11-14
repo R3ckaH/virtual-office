@@ -1,4 +1,4 @@
-import type { PublicConfigDto } from '@vo/shared';
+import type { ModuleKey, PublicConfigDto } from '@vo/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { apiRaw } from './api';
@@ -40,4 +40,10 @@ export function usePublicConfig() {
     if (q.data?.companyName) document.title = `${q.data.companyName} · Virtual Office`;
   }, [q.data?.companyName]);
   return q;
+}
+
+/** Optional modules that are switched on for this copy of the office. Empty until the config has loaded. */
+export function useModules(): ModuleKey[] {
+  const q = useQuery({ queryKey: ['public-config'], queryFn: () => apiRaw<PublicConfigDto>('/config'), staleTime: 5 * 60_000 });
+  return q.data?.modules ?? [];
 }

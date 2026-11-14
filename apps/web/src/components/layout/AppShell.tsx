@@ -1,4 +1,4 @@
-import type { Permission } from '@vo/shared';
+import type { ModuleKey, Permission } from '@vo/shared';
 import { ROLE_LABELS } from '@vo/shared';
 import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
@@ -35,7 +35,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { usePublicConfig } from '@/lib/config';
+import { useModules, usePublicConfig } from '@/lib/config';
 import { cityOf, formatTime } from '@/lib/format';
 import { ThemeChoice, useTheme } from '@/lib/theme';
 import { PresencePrompts } from '@/components/presence/PresencePrompts';
@@ -52,6 +52,8 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   permission?: Permission;
+  /** optional module this page belongs to: hidden when the module is off for this copy */
+  module?: ModuleKey;
   /** release phase for modules that aren't built yet */
   phase?: number;
   /** live count shown next to the label */
@@ -73,7 +75,7 @@ const ADMIN: NavItem[] = [
   { to: '/admin/users', label: 'People', icon: Users, permission: 'users.manage' },
   { to: '/admin/attendance', label: 'Attendance board', icon: ClipboardCheck, permission: 'attendance.manage' },
   { to: '/admin/schedules', label: 'Schedules & setup', icon: CalendarClock, permission: 'attendance.manage' },
-  { to: '/admin/devices', label: 'Biometric devices', icon: Fingerprint, permission: 'devices.manage' },
+  { to: '/admin/devices', label: 'Biometric devices', icon: Fingerprint, permission: 'devices.manage', module: 'devices' },
   { to: '/admin/rooms', label: 'Office rooms', icon: DoorOpen, permission: 'rooms.manage' },
   { to: '/admin/meetings', label: 'Meetings & video', icon: Video, permission: 'settings.manage' },
   { to: '/admin/leave', label: 'Leave & holidays', icon: CalendarDays, permission: 'leave.manage' },
@@ -108,7 +110,8 @@ function CallLayer() {
 
 function NavGroup({ label, items, onNavigate }: { label?: string; items: NavItem[]; onNavigate: () => void }) {
   const { can } = useAuth();
-  const visible = items.filter((i) => !i.permission || can(i.permission));
+  const modules = useModules();
+  const visible = items.filter((i) => (!i.permission || can(i.permission)) && (!i.module || modules.includes(i.module)));
   if (!visible.length) return null;
   return (
     <div className="space-y-0.5">

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Header, HttpCode, Inject, Logger, Post, Query, Req, UnauthorizedException } from '@nestjs/common';
 import type { Request } from 'express';
 import { and, eq } from 'drizzle-orm';
-import { Public } from '../common/auth-context';
+import { Public, RequiresModule } from '../common/auth-context';
 import { DB, Db } from '../db/client';
 import { Device, devices } from '../db/schema';
 import { IngestService } from './ingest.service';
@@ -16,6 +16,7 @@ import { parseAttlog } from './parsers';
  * "Cloud push", be active, and (optionally) come from an allowed IP.
  */
 @Controller('iclock')
+@RequiresModule('devices')
 @Public()
 export class AdmsController {
   private readonly logger = new Logger('ADMS');

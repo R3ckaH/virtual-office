@@ -1,8 +1,9 @@
-import type { Permission } from '@vo/shared';
+import type { ModuleKey, Permission } from '@vo/shared';
 import { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { EmptyState, Spinner } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { usePublicConfig } from '@/lib/config';
 
 export function FullPageSpinner() {
   return (
@@ -33,6 +34,16 @@ export function RequirePermission({ permission, children }: { permission: Permis
         Ask an administrator if you think you should.
       </EmptyState>
     );
+  }
+  return <>{children}</>;
+}
+
+/** Pages of an optional module: shown only when the module is on for this copy of the office. */
+export function RequireModule({ module, children }: { module: ModuleKey; children: ReactNode }) {
+  const config = usePublicConfig();
+  if (!config.data) return config.isError ? <EmptyState title="Couldn't load this page">Check your connection and try again.</EmptyState> : <Spinner label="Loading" />;
+  if (!config.data.modules?.includes(module)) {
+    return <EmptyState title="This isn't part of your office">Ask an administrator if you think it should be.</EmptyState>;
   }
   return <>{children}</>;
 }

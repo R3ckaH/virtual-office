@@ -15,7 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { dateQuerySchema, deviceSchema, linkDeviceUserSchema, type DateQuery, type DeviceInput, type LinkDeviceUserInput } from '@vo/shared';
 import type { Request } from 'express';
-import { CurrentUser, RequirePermissions } from '../common/auth-context';
+import { CurrentUser, RequirePermissions, RequiresModule } from '../common/auth-context';
 import { ZodPipe } from '../common/zod.pipe';
 import type { User } from '../db/schema';
 import { DevicesService } from './devices.service';
@@ -23,6 +23,7 @@ import { DevicesService } from './devices.service';
 const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
 
 @Controller('devices')
+@RequiresModule('devices')
 @RequirePermissions('devices.manage')
 export class DevicesController {
   constructor(private readonly devices: DevicesService) {}
@@ -76,6 +77,7 @@ export class DevicesController {
 }
 
 @Controller('device-users')
+@RequiresModule('devices')
 @RequirePermissions('devices.manage')
 export class DeviceUsersController {
   constructor(private readonly devices: DevicesService) {}

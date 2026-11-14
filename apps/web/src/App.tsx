@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
-import { RedirectIfSignedIn, RequireAuth, RequirePermission } from '@/components/layout/guards';
+import { RedirectIfSignedIn, RequireAuth, RequireModule, RequirePermission } from '@/components/layout/guards';
 import { AuditLogPage } from '@/pages/admin/AuditLogPage';
 import { DepartmentsPage } from '@/pages/admin/DepartmentsPage';
 import { DevicesPage } from '@/pages/admin/DevicesPage';
@@ -46,7 +46,7 @@ export function App() {
         <Route path="admin/users" element={<RequirePermission permission="users.manage"><UsersPage /></RequirePermission>} />
         <Route path="admin/attendance" element={<RequirePermission permission="attendance.manage"><HrAttendancePage /></RequirePermission>} />
         <Route path="admin/schedules" element={<RequirePermission permission="attendance.manage"><SchedulesPage /></RequirePermission>} />
-        <Route path="admin/devices" element={<RequirePermission permission="devices.manage"><DevicesPage /></RequirePermission>} />
+        <Route path="admin/devices" element={<RequireModule module="devices"><RequirePermission permission="devices.manage"><DevicesPage /></RequirePermission></RequireModule>} />
         <Route path="admin/rooms" element={<RequirePermission permission="rooms.manage"><RoomsPage /></RequirePermission>} />
         <Route path="admin/meetings" element={<RequirePermission permission="settings.manage"><MeetingSettingsPage /></RequirePermission>} />
         <Route path="admin/leave" element={<RequirePermission permission="leave.manage"><LeaveSettingsPage /></RequirePermission>} />

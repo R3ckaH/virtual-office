@@ -5,7 +5,7 @@ import type { PublicConfigDto } from '@vo/shared';
 import { sql } from 'drizzle-orm';
 import { SsoService } from '../auth/sso.service';
 import { Public } from '../common/auth-context';
-import { env } from '../config/env';
+import { enabledModules, env } from '../config/env';
 import { DB, Db } from '../db/client';
 import { SettingsService } from './settings.service';
 
@@ -48,6 +48,7 @@ export class PublicController {
       ssoProviders: this.sso.enabledProviders(),
       deviceHost: env().DEVICE_HOST || env().RAILWAY_PUBLIC_DOMAIN || null,
       realtimeUrl: realtimeUrl(),
+      modules: enabledModules(),
     };
   }
 

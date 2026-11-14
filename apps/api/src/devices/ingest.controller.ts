@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Headers, HttpCode, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ingestSchema, type IngestInput, type IngestResultDto } from '@vo/shared';
-import { Public } from '../common/auth-context';
+import { Public, RequiresModule } from '../common/auth-context';
 import { ZodPipe } from '../common/zod.pipe';
 import { IngestService } from './ingest.service';
 
@@ -10,6 +10,7 @@ import { IngestService } from './ingest.service';
  * (Authorization: Bearer vod_...), not a user session.
  */
 @Controller('ingest')
+@RequiresModule('devices')
 @Public()
 @Throttle({ default: { ttl: 60_000, limit: 120 } })
 export class IngestController {

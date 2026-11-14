@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { ModuleKey, parseModules } from '@vo/shared';
 import { z } from 'zod';
 
 const bool = z
@@ -32,6 +33,13 @@ const envSchema = z.object({
   MICROSOFT_CLIENT_SECRET: z.string().optional().default(''),
   MICROSOFT_TENANT: z.string().default('organizations'),
   TRUST_PROXY: bool.default(false),
+  /** optional modules switched on for this copy, comma-separated (see MODULES in @vo/shared); "none" or empty turns all off */
+  MODULES: z
+    .string()
+    .optional()
+    .refine((v) => parseModules(v === 'none' ? '' : v).unknown.length === 0, (v) => ({
+      message: `Unknown module: ${parseModules(v).unknown.join(', ')}`,
+    })),
   /** URL browsers open the live connection to (e.g. https://api.example.com). Defaults to the API's public domain when behind the Vercel proxy, or the same site otherwise. */
   REALTIME_URL: z.string().url().optional().or(z.literal('')).default(''),
   /** LiveKit (video). Server URL like wss://your-project.livekit.cloud, plus an API key and secret. */
@@ -71,5 +79,12 @@ export function env(): Env {
   }
   return cached;
 }
+
+/** Optional modules switched on for this copy. */
+export function enabledModules(): ModuleKey[] {
+  const v = env().MODULES;
+  return parseModules(v === 'none' ? '' : v).enabled;
+}
+export const moduleEnabled = (key: ModuleKey) => enabledModules().includes(key);
 
 export const isProd = () => env().NODE_ENV === 'production';

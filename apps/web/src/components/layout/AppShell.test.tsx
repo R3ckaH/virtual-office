@@ -5,7 +5,7 @@ import { RequireAuth, RequirePermission } from '@/components/layout/guards';
 import { loginResponse, me, mockApi, renderApp } from '@/test/utils';
 import { AppShell } from './AppShell';
 
-const config = { body: { companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null, realtimeUrl: null } };
+const config = { body: { companyName: 'Acme Corp', primaryColor: '#2563eb', logoUrl: null, sessionTimeoutMinutes: 30, ssoProviders: [], deviceHost: null, realtimeUrl: null, modules: ['devices'] } };
 const ADMIN_PERMS = ['users.read', 'users.manage', 'departments.manage', 'authEvents.read', 'auditLogs.read', 'team.read', 'reports.read', 'settings.manage'];
 
 function App() {
@@ -60,6 +60,25 @@ describe('AppShell navigation (RBAC in the UI)', () => {
     expect(within(nav).getByRole('link', { name: /Home/ })).toBeInTheDocument();
   });
 
+  it('hides the pages of a module that is off for this copy', async () => {
+    signedInAs(me('ADMIN', [...ADMIN_PERMS, 'devices.manage']));
+    const { unmount } = renderApp(<App />);
+    const nav = (await screen.findAllByRole('navigation', { name: 'Main' }))[0];
+    expect(await within(nav).findByRole('link', { name: /Biometric devices/ })).toBeInTheDocument();
+    unmount();
+
+    mockApi({
+      'GET /config': { body: { ...config.body, modules: [] } },
+      'POST /auth/refresh': { body: loginResponse(me('ADMIN', [...ADMIN_PERMS, 'devices.manage'])) },
+      'POST /auth/activity': { body: {} },
+      'GET /org/timezones': { body: [] },
+    });
+    renderApp(<App />);
+    const nav2 = (await screen.findAllByRole('navigation', { name: 'Main' }))[0];
+    expect(await within(nav2).findByRole('link', { name: /People/ })).toBeInTheDocument();
+    expect(within(nav2).queryByRole('link', { name: /Biometric devices/ })).toBeNull();
+  });
+
   it('shows the admin section to admins', async () => {
     signedInAs(me('ADMIN', ADMIN_PERMS));
     renderApp(<App />, { route: '/admin/users' });
@@ -84,7 +103,7 @@ describe('AppShell navigation (RBAC in the UI)', () => {
     expect(await screen.findByText('Home screen')).toBeInTheDocument();
     const nav = screen.getAllByRole('navigation', { name: 'Main' })[0];
     expect(within(nav).getByRole('link', { name: /Attendance board/ })).toBeInTheDocument();
-    expect(within(nav).getByRole('link', { name: /Biometric devices/ })).toBeInTheDocument();
+    expect(await within(nav).findByRole('link', { name: /Biometric devices/ })).toBeInTheDocument();
     expect(within(nav).getByRole('link', { name: /Schedules & setup/ })).toBeInTheDocument();
     expect(within(nav).queryByRole('link', { name: /^People/ })).toBeNull();
   });
