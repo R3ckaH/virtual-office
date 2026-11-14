@@ -23,7 +23,7 @@ function DepartmentDialog({ open, onClose, dept }: { open: boolean; onClose: () 
   useEffect(() => {
     if (open) {
       setError(null);
-      form.reset({ name: dept?.name ?? '', headUserId: dept?.headUserId ?? null });
+      form.reset({ name: dept?.name ?? '', headUserId: dept?.headUserId ?? null, requireDailyReport: dept?.requireDailyReport ?? false });
     }
   }, [open, dept, form]);
 
@@ -72,6 +72,13 @@ function DepartmentDialog({ open, onClose, dept }: { open: boolean; onClose: () 
             </Select>
           )}
         </Field>
+        <label className="flex items-start gap-3 text-sm">
+          <input type="checkbox" className="mt-1" {...form.register('requireDailyReport')} />
+          <span>
+            <span className="block font-medium">Require an end-of-day report</span>
+            <span className="block text-muted">People in this department file a short report (what they did, blockers, plan for tomorrow) before clocking out on the web. Biometric punches are never blocked.</span>
+          </span>
+        </label>
         <button type="submit" hidden />
       </form>
     </Dialog>
@@ -123,6 +130,7 @@ export function DepartmentsPage() {
               <h2 className="text-lg font-semibold">{d.name}</h2>
               <p className="mt-1 text-sm text-muted">
                 {d.memberCount} {d.memberCount === 1 ? 'person' : 'people'} · Head: {d.headUserName ?? 'not assigned'}
+                {d.requireDailyReport ? ' · End-of-day report required' : ''}
               </p>
               <div className="mt-5 flex gap-2">
                 <Button

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { addDays, isoWeekday, WorkSetup, zonedToUtc } from '@vo/shared';
-import { and, gte, inArray, lte } from 'drizzle-orm';
+import { and, eq, gte, inArray, lte } from 'drizzle-orm';
 import { DB, Db } from '../db/client';
-import { dayOverrides, scheduleAssignments, scheduleDays, users, workSchedules } from '../db/schema';
+import { dayOverrides, holidays, leaveRequests, leaveTypes, scheduleAssignments, scheduleDays, users, workSchedules } from '../db/schema';
 import { SettingsService } from '../settings/settings.service';
 import type { DayPlan, Shift } from './engine';
 import { shiftLabel } from './format';
@@ -40,7 +40,21 @@ export class PlanContext {
     private readonly schedules: Map<string, ScheduleInfo>,
     private readonly overrides: Map<string, typeof dayOverrides.$inferSelect>,
     readonly companyTz: string,
+    /** approved leave by "userId:date" → leave type name */
+    private readonly leave: Map<string, string> = new Map(),
+    /** company holidays by date → name */
+    readonly holidays: Map<string, string> = new Map(),
   ) {}
+
+  /** The working plan from the schedule alone (no leave, no holidays): is this a work day? */
+  isScheduledWorkday(userId: string, date: string): boolean {
+    const o = this.overrides.get(`${userId}:${date}`);
+    if (o?.kind === 'DAY_OFF') return false;
+    if (o?.kind === 'SHIFT') return true;
+    const sched = this.schedule(userId, date);
+    if (sched) return !!sched.days.get(isoWeekday(date));
+    return isoWeekday(date) <= 5; // no schedule: Monday to Friday
+  }
 
   schedule(userId: string, date: string): ScheduleInfo | null {
     const list = this.assignments.get(userId) ?? [];
@@ -62,6 +76,15 @@ export class PlanContext {
     const o = this.overrides.get(`${userId}:${date}`);
     if (o?.kind === 'LEAVE' || o?.kind === 'DAY_OFF') {
       return { plan: { kind: o.kind, note: o.note }, onsite: onsiteFor(day?.onsite), tz, label: null, leaveNote: o.note, scheduleName: sched?.name ?? null };
+    }
+    // company holidays, then approved leave (an HR override above wins over both)
+    const holiday = this.holidays.get(date);
+    if (holiday && o?.kind !== 'SHIFT') {
+      return { plan: { kind: 'DAY_OFF', note: holiday }, onsite: onsiteFor(day?.onsite), tz, label: null, leaveNote: holiday, scheduleName: sched?.name ?? null };
+    }
+    const leave = this.leave.get(`${userId}:${date}`);
+    if (leave && o?.kind !== 'SHIFT' && this.isScheduledWorkday(userId, date)) {
+      return { plan: { kind: 'LEAVE', note: leave }, onsite: onsiteFor(day?.onsite), tz, label: null, leaveNote: leave, scheduleName: sched?.name ?? null };
     }
     if (o?.kind === 'SHIFT' && o.startTime && o.endTime) {
       return {
@@ -96,15 +119,26 @@ export class PlannerService {
 
   async context(userIds: string[], from: string, to: string): Promise<PlanContext> {
     const companyTz = (await this.settings.get()).defaultTimezone;
-    if (userIds.length === 0) return new PlanContext(new Map(), new Map(), new Map(), new Map(), companyTz);
-    const [people, assigns, overrides] = await Promise.all([
+    const hols = await this.db.select().from(holidays).where(and(gte(holidays.date, from), lte(holidays.date, to)));
+    const holidayMap = new Map(hols.map((h) => [h.date, h.name]));
+    if (userIds.length === 0) return new PlanContext(new Map(), new Map(), new Map(), new Map(), companyTz, new Map(), holidayMap);
+    const [people, assigns, overrides, leaves] = await Promise.all([
       this.db.select({ id: users.id, workSetup: users.workSetup }).from(users).where(inArray(users.id, userIds)),
       this.db.select().from(scheduleAssignments).where(inArray(scheduleAssignments.userId, userIds)),
       this.db
         .select()
         .from(dayOverrides)
         .where(and(inArray(dayOverrides.userId, userIds), gte(dayOverrides.workDate, from), lte(dayOverrides.workDate, to))),
+      this.db
+        .select({ userId: leaveRequests.userId, start: leaveRequests.startDate, end: leaveRequests.endDate, type: leaveTypes.name })
+        .from(leaveRequests)
+        .innerJoin(leaveTypes, eq(leaveTypes.id, leaveRequests.typeId))
+        .where(and(inArray(leaveRequests.userId, userIds), eq(leaveRequests.status, 'APPROVED'), lte(leaveRequests.startDate, to), gte(leaveRequests.endDate, from))),
     ]);
+    const leaveMap = new Map<string, string>();
+    for (const l of leaves) {
+      for (let d = l.start < from ? from : l.start; d <= l.end && d <= to; d = addDays(d, 1)) leaveMap.set(`${l.userId}:${d}`, l.type);
+    }
     const scheduleIds = [...new Set(assigns.map((a) => a.scheduleId).filter((x): x is string => !!x))];
     const [scheds, days] = scheduleIds.length
       ? await Promise.all([
@@ -131,6 +165,8 @@ export class PlannerService {
       schedules,
       new Map(overrides.map((o) => [`${o.userId}:${o.workDate}`, o])),
       companyTz,
+      leaveMap,
+      holidayMap,
     );
   }
 }

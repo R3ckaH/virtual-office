@@ -31,6 +31,7 @@ export class DepartmentsService {
       headUserId: d.headUserId,
       headUserName: headUserName ?? null,
       memberCount: Number(n ?? 0),
+      requireDailyReport: d.requireDailyReport,
     }));
   }
 
@@ -53,7 +54,7 @@ export class DepartmentsService {
     await this.validate(input);
     const [d] = await this.db
       .insert(departments)
-      .values({ name: input.name, headUserId: input.headUserId ?? null })
+      .values({ name: input.name, headUserId: input.headUserId ?? null, requireDailyReport: input.requireDailyReport ?? false })
       .returning();
     await this.audit.record({
       actorId: actor.id,
@@ -72,10 +73,13 @@ export class DepartmentsService {
     await this.validate(input, id);
     const [after] = await this.db
       .update(departments)
-      .set({ name: input.name, headUserId: input.headUserId ?? null })
+      .set({ name: input.name, headUserId: input.headUserId ?? null, ...(input.requireDailyReport !== undefined ? { requireDailyReport: input.requireDailyReport } : {}) })
       .where(eq(departments.id, id))
       .returning();
-    const d = diff({ name: before.name, headUserId: before.headUserId }, { name: after.name, headUserId: after.headUserId });
+    const d = diff(
+      { name: before.name, headUserId: before.headUserId, requireDailyReport: before.requireDailyReport },
+      { name: after.name, headUserId: after.headUserId, requireDailyReport: after.requireDailyReport },
+    );
     if (d.changed) {
       await this.audit.record({ actorId: actor.id, action: 'department.update', entityType: 'department', entityId: id, ...d, ip });
     }

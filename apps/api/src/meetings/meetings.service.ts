@@ -768,8 +768,10 @@ export class MeetingsService implements OnApplicationBootstrap, OnApplicationShu
         const host = await this.userById(m.hostId);
         const people = [...(host ? [{ userId: host.id, fullName: host.fullName, email: host.email, timezone: host.timezone }] : []), ...(await this.withZones(inv))];
         const { companyName } = await this.settings.get();
+        const email = await this.settings.notifies('meetingReminders');
         for (const p of people) {
           this.presence.notify(p.userId, 'meeting:reminder', { meetingId: m.id, title: m.title, start: start.toISOString() });
+          if (!email) continue;
           const when = new Intl.DateTimeFormat('en-US', { timeZone: p.timezone, hour: 'numeric', minute: '2-digit' }).format(start);
           const mail = actionEmail({
             companyName,
@@ -838,7 +840,7 @@ export class MeetingsService implements OnApplicationBootstrap, OnApplicationShu
   }
 
   private async emailInvites(m: Meeting, host: User, inv: Invitee[], kind: 'new' | 'updated') {
-    if (!inv.length) return;
+    if (!inv.length || !(await this.settings.notifies('meetingInvites'))) return;
     const ics = buildIcs([await this.icsEvent(m, host, inv)], 'REQUEST');
     const { companyName } = await this.settings.get();
     const zones = new Map((await this.withZones(inv)).map((p) => [p.userId, p.timezone]));
@@ -865,7 +867,7 @@ export class MeetingsService implements OnApplicationBootstrap, OnApplicationShu
   }
 
   private async emailCancel(m: Meeting, host: User, to: Invitee[], everyone: Invitee[]) {
-    if (!to.length) return;
+    if (!to.length || !(await this.settings.notifies('meetingInvites'))) return;
     const ics = buildIcs([{ ...(await this.icsEvent(m, host, everyone)), cancelled: true }], 'CANCEL');
     const { companyName } = await this.settings.get();
     for (const i of to) {

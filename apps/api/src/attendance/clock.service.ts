@@ -3,7 +3,7 @@ import type { ClockInput, ClockStateDto, MyDayDto, RangeQuery } from '@vo/shared
 import { addDays, dateRange, PUNCH_KIND_LABELS } from '@vo/shared';
 import { and, desc, eq, gte, isNotNull } from 'drizzle-orm';
 import { DB, Db } from '../db/client';
-import { attendanceDays, User } from '../db/schema';
+import { attendanceDays, dailyReports, departments, User } from '../db/schema';
 import { DayService } from './day.service';
 import { toDayDto, toPunchDto } from './dto';
 import { allowedActions } from './engine';
@@ -52,6 +52,7 @@ export class ClockService {
       const label = PUNCH_KIND_LABELS[input.action].toLowerCase();
       throw new ConflictException({ message: `You can’t ${label} right now. Refresh to see your latest status.`, code: 'CLOCK_STATE' });
     }
+    if (input.action === 'OUT') await this.requireDailyReport(user, state.workDate);
     // a fresh clock-in after yesterday's shift closed belongs to whatever date the rules pick
     const workDate = input.action === 'IN' && !state.day?.openSince ? await this.days.workDateFor(user.id, now) : state.workDate;
     await this.days.addPunch(
@@ -70,6 +71,18 @@ export class ClockService {
       now,
     );
     return this.state(user, now);
+  }
+
+  /** Phase 6: some departments ask for an end-of-day report before a web clock-out (biometric punches are never blocked). */
+  private async requireDailyReport(user: User, workDate: string) {
+    if (!user.departmentId) return;
+    const [d] = await this.db.select({ required: departments.requireDailyReport }).from(departments).where(eq(departments.id, user.departmentId));
+    if (!d?.required) return;
+    const [r] = await this.db
+      .select({ id: dailyReports.id })
+      .from(dailyReports)
+      .where(and(eq(dailyReports.userId, user.id), eq(dailyReports.workDate, workDate)));
+    if (!r) throw new ConflictException({ message: 'Your team asks for an end-of-day report before you clock out.', code: 'DAILY_REPORT_REQUIRED', workDate });
   }
 
   /** My days in a date range (Attendance page), newest first. At most 62 days. */

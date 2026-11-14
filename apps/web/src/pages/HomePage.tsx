@@ -4,6 +4,7 @@ import { Laptop, Smartphone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TimeClockCard } from '@/components/attendance/TimeClockCard';
 import { AnnouncementsCard } from '@/components/chat/AnnouncementsCard';
+import { MyDashboard, TeamDashboard } from '@/components/dashboard/Dashboards';
 import { OfficeNowCard } from '@/components/presence/OfficeNowCard';
 import { Badge, Panel } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -16,8 +17,9 @@ function greeting(tz: string) {
 }
 
 export function HomePage() {
-  const { user } = useAuth();
+  const { user, can } = useAuth();
   const u = user!;
+  const lead = can('team.read') || can('attendance.manage');
   const sessions = useQuery({ queryKey: ['my-sessions'], queryFn: () => api<SessionDto[]>('/auth/sessions') });
   const today = new Intl.DateTimeFormat(undefined, { timeZone: u.timezone, weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
 
@@ -58,6 +60,10 @@ export function HomePage() {
           </dl>
         </Panel>
       </div>
+
+      <MyDashboard />
+
+      {lead && <TeamDashboard />}
 
       <OfficeNowCard />
 

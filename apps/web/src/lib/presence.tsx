@@ -53,6 +53,9 @@ const FORWARDED = [
   'chat:read',
   'chat:typing',
   'chat:pins',
+  'notice',
+  'leave:changed',
+  'tasks:changed',
 ] as const;
 export type ForwardedEvent = (typeof FORWARDED)[number];
 

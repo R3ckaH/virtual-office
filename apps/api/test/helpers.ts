@@ -24,9 +24,10 @@ export interface TestCtx {
 export async function setup(): Promise<TestCtx> {
   const pool0 = new Pool({ connectionString: process.env.DATABASE_URL });
   await pool0.query(
-    'TRUNCATE sessions, auth_events, audit_logs, one_time_tokens, mfa_recovery_codes, sso_identities, punches, attendance_days, attendance_exceptions, correction_requests, day_overrides, import_batches, device_user_links, presence, meetings, calendar_feeds, channels, chat_files CASCADE',
+    'TRUNCATE sessions, auth_events, audit_logs, one_time_tokens, mfa_recovery_codes, sso_identities, punches, attendance_days, attendance_exceptions, correction_requests, day_overrides, import_batches, device_user_links, presence, meetings, calendar_feeds, channels, chat_files, leave_types, holidays, tasks, daily_reports CASCADE',
   );
-  await pool0.query('UPDATE org_settings SET recording_enabled = false',
+  await pool0.query("UPDATE departments SET require_daily_report = false");
+  await pool0.query("UPDATE org_settings SET recording_enabled = false, notifications = DEFAULT, company_name = 'Acme Corp', primary_color = '#2563eb', logo_url = NULL, session_timeout_minutes = 30",
   );
   await pool0.end();
   const { users } = await seed(process.env.DATABASE_URL);

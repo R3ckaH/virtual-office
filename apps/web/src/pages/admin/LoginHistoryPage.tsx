@@ -1,4 +1,4 @@
-import { AUTH_EVENT_TYPES, type AuthEventDto, type AuthEventType, type Paged, type UserDto } from '@vo/shared';
+import { AUTH_EVENT_LABELS, AUTH_EVENT_TYPES, type AuthEventDto, type AuthEventType, type Paged, type UserDto } from '@vo/shared';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Badge, EmptyState, Input, PageHeader, Pagination, Select, Spinner } from '@/components/ui';
@@ -6,21 +6,7 @@ import { api, qs } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { formatDateTime, zonedDayStartIso } from '@/lib/format';
 
-export const EVENT_LABELS: Record<AuthEventType, string> = {
-  LOGIN_SUCCESS: 'Signed in',
-  LOGIN_FAILED: 'Sign-in failed',
-  LOGIN_LOCKED: 'Locked out',
-  LOGOUT: 'Signed out',
-  SESSION_TIMEOUT: 'Timed out (inactive)',
-  FORCED_LOGOUT: 'Signed out by admin',
-  PASSWORD_RESET_REQUESTED: 'Reset link requested',
-  PASSWORD_RESET: 'Password reset',
-  PASSWORD_CHANGED: 'Password changed',
-  MFA_ENABLED: '2-step turned on',
-  MFA_DISABLED: '2-step turned off',
-  MFA_FAILED: 'Wrong 2-step code',
-  REFRESH_TOKEN_REUSE: 'Suspicious session reuse',
-};
+export const EVENT_LABELS: Record<AuthEventType, string> = AUTH_EVENT_LABELS;
 
 const TONE: Partial<Record<AuthEventType, 'ok' | 'warn' | 'danger' | 'neutral'>> = {
   LOGIN_SUCCESS: 'ok',

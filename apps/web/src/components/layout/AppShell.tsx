@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import {
   BarChart3,
+  Building,
   Building2,
   CalendarClock,
   CalendarDays,
@@ -43,6 +44,7 @@ import { PresenceProvider } from '@/lib/presence';
 import { CallsProvider, useCalls } from '@/lib/calls';
 import { CallPrompts } from '@/components/meetings/CallPrompts';
 import { attentionCount, ChatLive, useChannels } from '@/lib/chat';
+import { NoticeLive } from '@/lib/notices';
 import { IdleGuard } from './IdleGuard';
 
 interface NavItem {
@@ -61,10 +63,10 @@ const WORK: NavItem[] = [
   { to: '/floor', label: 'Office Floor', icon: Building2 },
   { to: '/meetings', label: 'Meetings', icon: Video },
   { to: '/chat', label: 'Chat', icon: MessageSquare, badge: 'chat' },
-  { to: '/tasks', label: 'Tasks', icon: ListChecks, phase: 6 },
+  { to: '/tasks', label: 'Tasks', icon: ListChecks },
   { to: '/attendance', label: 'Attendance', icon: Clock },
-  { to: '/leave', label: 'Leave', icon: CalendarDays, phase: 6 },
-  { to: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports.read', phase: 7 },
+  { to: '/leave', label: 'Leave', icon: CalendarDays },
+  { to: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports.read' },
 ];
 
 const ADMIN: NavItem[] = [
@@ -74,6 +76,8 @@ const ADMIN: NavItem[] = [
   { to: '/admin/devices', label: 'Biometric devices', icon: Fingerprint, permission: 'devices.manage' },
   { to: '/admin/rooms', label: 'Office rooms', icon: DoorOpen, permission: 'rooms.manage' },
   { to: '/admin/meetings', label: 'Meetings & video', icon: Video, permission: 'settings.manage' },
+  { to: '/admin/leave', label: 'Leave & holidays', icon: CalendarDays, permission: 'leave.manage' },
+  { to: '/admin/company', label: 'Company settings', icon: Building, permission: 'settings.manage' },
   { to: '/admin/departments', label: 'Departments', icon: Network, permission: 'departments.manage' },
   { to: '/admin/login-history', label: 'Login history', icon: KeyRound, permission: 'authEvents.read' },
   { to: '/admin/audit-log', label: 'Audit log', icon: FileClock, permission: 'auditLogs.read' },
@@ -307,6 +311,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
       <PresencePrompts />
       <CallPrompts />
       <ChatLive />
+      <NoticeLive />
     </div>
     <CallLayer />
     </CallsProvider>

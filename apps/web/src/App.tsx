@@ -14,10 +14,14 @@ import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { AttendancePage } from '@/pages/attendance/AttendancePage';
-import { ComingSoonPage } from '@/pages/ComingSoonPage';
 import { FloorPage } from '@/pages/floor/FloorPage';
 import { HomePage } from '@/pages/HomePage';
 import { ChatPage } from '@/pages/chat/ChatPage';
+import { LeavePage } from '@/pages/leave/LeavePage';
+import { TasksPage } from '@/pages/tasks/TasksPage';
+import { ReportsPage } from '@/pages/reports/ReportsPage';
+import { LeaveSettingsPage } from '@/pages/admin/LeaveSettingsPage';
+import { CompanySettingsPage } from '@/pages/admin/CompanySettingsPage';
 import { MeetingsPage } from '@/pages/meetings/MeetingsPage';
 import { ProfilePage } from '@/pages/settings/ProfilePage';
 
@@ -34,10 +38,10 @@ export function App() {
         <Route path="meetings" element={<MeetingsPage />} />
         <Route path="chat" element={<ChatPage />} />
         <Route path="chat/:channelId" element={<ChatPage />} />
-        <Route path="tasks" element={<ComingSoonPage module="tasks" />} />
+        <Route path="tasks" element={<TasksPage />} />
         <Route path="attendance" element={<AttendancePage />} />
-        <Route path="leave" element={<ComingSoonPage module="leave" />} />
-        <Route path="reports" element={<RequirePermission permission="reports.read"><ComingSoonPage module="reports" /></RequirePermission>} />
+        <Route path="leave" element={<LeavePage />} />
+        <Route path="reports" element={<RequirePermission permission="reports.read"><ReportsPage /></RequirePermission>} />
         <Route path="settings/profile" element={<ProfilePage />} />
         <Route path="admin/users" element={<RequirePermission permission="users.manage"><UsersPage /></RequirePermission>} />
         <Route path="admin/attendance" element={<RequirePermission permission="attendance.manage"><HrAttendancePage /></RequirePermission>} />
@@ -45,6 +49,8 @@ export function App() {
         <Route path="admin/devices" element={<RequirePermission permission="devices.manage"><DevicesPage /></RequirePermission>} />
         <Route path="admin/rooms" element={<RequirePermission permission="rooms.manage"><RoomsPage /></RequirePermission>} />
         <Route path="admin/meetings" element={<RequirePermission permission="settings.manage"><MeetingSettingsPage /></RequirePermission>} />
+        <Route path="admin/leave" element={<RequirePermission permission="leave.manage"><LeaveSettingsPage /></RequirePermission>} />
+        <Route path="admin/company" element={<RequirePermission permission="settings.manage"><CompanySettingsPage /></RequirePermission>} />
         <Route path="admin/departments" element={<RequirePermission permission="departments.manage"><DepartmentsPage /></RequirePermission>} />
         <Route path="admin/login-history" element={<RequirePermission permission="authEvents.read"><LoginHistoryPage /></RequirePermission>} />
         <Route path="admin/audit-log" element={<RequirePermission permission="auditLogs.read"><AuditLogPage /></RequirePermission>} />

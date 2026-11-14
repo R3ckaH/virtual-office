@@ -49,7 +49,7 @@ export const me = (role: 'ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE', permissions: s
   role,
   status: 'ACTIVE',
   timezone: 'Asia/Manila',
-  departmentId: null,
+  departmentId: null as string | null,
   departmentName: 'Engineering',
   managerId: null,
   managerName: 'Jose Reyes',

@@ -3,7 +3,7 @@ import { ALLOWED_FILE_TYPES, fileExtension, MAX_FILE_BYTES, MAX_FILES_PER_MESSAG
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { FileText, Loader2, Paperclip, SendHorizontal, X } from 'lucide-react';
-import { ClipboardEvent, DragEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { ClipboardEvent, DragEvent, KeyboardEvent, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Avatar } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/toast';
 import { api, ApiError } from '@/lib/api';
@@ -70,13 +70,19 @@ function useMentionBox(channelId: string, text: string, setText: (s: string) => 
     const next = text.slice(0, mq.start) + insert + text.slice(caret);
     picked.set(p.userId, p.fullName);
     setText(next);
-    const pos = mq.start + insert.length;
-    requestAnimationFrame(() => {
-      ref.current?.focus();
-      ref.current?.setSelectionRange(pos, pos);
-      setCaret(pos);
-    });
+    pendingCaret.current = mq.start + insert.length;
   }
+
+  // put the caret after the inserted name once the new text is on screen
+  const pendingCaret = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const pos = pendingCaret.current;
+    if (pos === null || !ref.current) return;
+    pendingCaret.current = null;
+    ref.current.focus();
+    ref.current.setSelectionRange(pos, pos);
+    setCaret(pos);
+  }, [text]);
 
   /** returns true when the key was used by the mention menu */
   function onMentionKey(e: KeyboardEvent<HTMLTextAreaElement>) {

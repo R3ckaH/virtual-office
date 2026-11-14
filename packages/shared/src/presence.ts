@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ChatServerEvents } from './chat';
+import type { WorkServerEvents } from './work';
 import type { typingSchema } from './chat';
 
 /* ------------------------------------------------------------------ */
@@ -374,7 +375,7 @@ export interface ServerEvents {
   'meetings:changed': { meetingId: string };
 }
 
-export interface ServerEvents extends ChatServerEvents {}
+export interface ServerEvents extends ChatServerEvents, WorkServerEvents {}
 
 /** Socket.IO-style listener maps (for typing `io()` / `Server`). */
 export type ServerEventListeners = { [K in keyof ServerEvents]: (data: ServerEvents[K]) => void };

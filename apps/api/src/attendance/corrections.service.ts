@@ -211,7 +211,7 @@ export class CorrectionsService {
 
   private async notify(c: CorrectionRequest, approved: boolean, note?: string) {
     const [u] = await this.db.select().from(users).where(eq(users.id, c.userId));
-    if (!u) return;
+    if (!u || !(await this.settings.notifies('corrections'))) return;
     const company = (await this.settings.get()).companyName;
     const body = approved
       ? `Your time correction for ${dayLabel(c.workDate)} was approved and your timesheet was updated.`

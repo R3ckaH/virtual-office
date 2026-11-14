@@ -27,6 +27,6 @@ import { TeamController } from './team.controller';
     SchedulesService,
     AttendanceJobs,
   ],
-  exports: [ClockService, DayService, ExceptionsService, RulesService, PlannerService, AttendanceJobs],
+  exports: [BoardService, CorrectionsService, ClockService, DayService, ExceptionsService, RulesService, PlannerService, AttendanceJobs],
 })
 export class AttendanceModule {}

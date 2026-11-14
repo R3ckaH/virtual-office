@@ -31,6 +31,8 @@ export async function createApp(): Promise<INestApplication> {
   app.useBodyParser('text', { type: (req: { url?: string }) => (req.url ?? '').startsWith('/api/livekit/webhook'), limit: '1mb' });
   // chat files are uploaded as the raw file body (up to 10 MB)
   app.useBodyParser('raw', { type: (req: { url?: string; method?: string }) => req.method === 'POST' && (req.url ?? '').startsWith('/api/chat/files'), limit: '11mb' });
+  // company logo upload (raw image, small)
+  app.useBodyParser('raw', { type: (req: { url?: string; method?: string }) => req.method === 'PUT' && (req.url ?? '').startsWith('/api/admin/company/logo'), limit: '300kb' });
   app.enableCors({ origin: [e.WEB_ORIGIN], credentials: true });
   app.setGlobalPrefix('api', { exclude: ['iclock/cdata', 'iclock/getrequest', 'iclock/devicecmd'] });
   app.useGlobalFilters(new HttpExceptionFilter());

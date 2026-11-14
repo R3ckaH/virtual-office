@@ -36,6 +36,13 @@
       "when": 1794200126785,
       "tag": "0004_phase5_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794623637059,
+      "tag": "0005_phase6_7_leave_tasks_reports",
+      "breakpoints": true
     }
   ]
 }

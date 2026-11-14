@@ -9,8 +9,8 @@ function hueFor(seed: string) {
   return hues[h % hues.length];
 }
 
-export function Avatar({ name, src, size = 'md', className }: { name: string; src?: string | null; size?: 'sm' | 'md' | 'lg'; className?: string }) {
-  const dims = size === 'sm' ? 'h-7 w-7 text-2xs' : size === 'lg' ? 'h-14 w-14 text-lg' : 'h-9 w-9 text-xs';
+export function Avatar({ name, src, size = 'md', className }: { name: string; src?: string | null; size?: 'xs' | 'sm' | 'md' | 'lg'; className?: string }) {
+  const dims = size === 'xs' ? 'h-5 w-5 text-[9px]' : size === 'sm' ? 'h-7 w-7 text-2xs' : size === 'lg' ? 'h-14 w-14 text-lg' : 'h-9 w-9 text-xs';
   if (src) return <img src={src} alt="" className={clsx('rounded-full object-cover', dims, className)} />;
   const hue = hueFor(name);
   return (

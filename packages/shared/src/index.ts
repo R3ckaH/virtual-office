@@ -6,6 +6,8 @@ export * from './attendance';
 export * from './presence';
 export * from './meetings';
 export * from './chat';
+export * from './work';
+export * from './admin';
 
 /* ------------------------------------------------------------------ */
 /* Roles                                                               */
@@ -40,6 +42,21 @@ export const AUTH_EVENT_TYPES = [
   'REFRESH_TOKEN_REUSE',
 ] as const;
 export type AuthEventType = (typeof AUTH_EVENT_TYPES)[number];
+export const AUTH_EVENT_LABELS: Record<AuthEventType, string> = {
+  LOGIN_SUCCESS: 'Signed in',
+  LOGIN_FAILED: 'Sign-in failed',
+  LOGIN_LOCKED: 'Locked out',
+  LOGOUT: 'Signed out',
+  SESSION_TIMEOUT: 'Timed out (inactive)',
+  FORCED_LOGOUT: 'Signed out by admin',
+  PASSWORD_RESET_REQUESTED: 'Reset link requested',
+  PASSWORD_RESET: 'Password reset',
+  PASSWORD_CHANGED: 'Password changed',
+  MFA_ENABLED: '2-step turned on',
+  MFA_DISABLED: '2-step turned off',
+  MFA_FAILED: 'Wrong 2-step code',
+  REFRESH_TOKEN_REUSE: 'Suspicious session reuse',
+};
 
 export const SSO_PROVIDERS = ['google', 'microsoft'] as const;
 export type SsoProvider = (typeof SSO_PROVIDERS)[number];
@@ -147,6 +164,8 @@ export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 export const departmentSchema = z.object({
   name: z.string().trim().min(1, 'Required').max(80),
   headUserId: uuid.nullable().optional(),
+  /** people in this department file an end-of-day report before clocking out on the web */
+  requireDailyReport: z.boolean().optional(),
 });
 export type DepartmentInput = z.infer<typeof departmentSchema>;
 
@@ -204,6 +223,7 @@ export interface DepartmentDto {
   headUserId: string | null;
   headUserName: string | null;
   memberCount: number;
+  requireDailyReport: boolean;
 }
 
 export interface SessionDto {
@@ -302,12 +322,13 @@ export const PERMISSIONS = [
   'rooms.manage', // office floor rooms: names, types, owners, members
   'meetings.schedule', // put meetings on the calendar and invite people (everyone can make instant calls)
   'chat.channels', // create custom chat channels (everyone can message and join public channels)
+  'leave.manage', // leave types, balances and adjustments; approve anyone's leave
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ADMIN: PERMISSIONS,
-  HR: ['users.read', 'attendance.manage', 'devices.manage', 'reports.read', 'meetings.schedule', 'chat.channels'],
+  HR: ['users.read', 'attendance.manage', 'devices.manage', 'reports.read', 'meetings.schedule', 'chat.channels', 'leave.manage'],
   MANAGER: ['users.read', 'team.read', 'reports.read', 'meetings.schedule', 'chat.channels'],
   EMPLOYEE: [],
 };

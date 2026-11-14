@@ -2,10 +2,12 @@ import type { ClockStateDto, PunchKind } from '@vo/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { Clock, Coffee, LogIn, LogOut } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Alert, Button, Spinner } from '@/components/ui';
 import { useToast } from '@/components/ui/toast';
 import { api, ApiError } from '@/lib/api';
+import { DailyReportDialog } from '@/components/work/DailyReportForm';
 import { useAuth } from '@/lib/auth';
 import { clock, hms, liveMinutes, SourceIcon, StatusChip, useNow } from './parts';
 
@@ -34,10 +36,15 @@ export function TimeClockCard({ showLink = true }: { showLink?: boolean }) {
       toast(`${ACTION[action].done} at ${clock(new Date().toISOString(), tz)}`);
     },
     onError: (e) => {
+      if (e instanceof ApiError && e.code === 'DAILY_REPORT_REQUIRED') {
+        setNeedReport(true);
+        return;
+      }
       toast(e instanceof ApiError ? e.message : 'That didn’t work. Try again.', 'danger');
       void qc.invalidateQueries({ queryKey: clockKey });
     },
   });
+  const [needReport, setNeedReport] = useState(false);
 
   const s = state.data;
   const day = s?.day ?? null;
@@ -124,6 +131,14 @@ export function TimeClockCard({ showLink = true }: { showLink?: boolean }) {
           )}
         </>
       )}
+      <DailyReportDialog
+        open={needReport}
+        onClose={() => setNeedReport(false)}
+        onFiled={() => {
+          setNeedReport(false);
+          punch.mutate('OUT');
+        }}
+      />
     </section>
   );
 }

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { DEFAULT_NOTIFICATIONS, NotificationKind } from '@vo/shared';
 import { eq } from 'drizzle-orm';
 import { DB, Db } from '../db/client';
 import { orgSettings } from '../db/schema';
@@ -22,6 +23,12 @@ export class SettingsService {
     }
     this.cache = { value: row, at: Date.now() };
     return row;
+  }
+
+  /** Is this kind of email switched on (Admin → Company settings → Notifications)? */
+  async notifies(kind: NotificationKind): Promise<boolean> {
+    const n = (await this.get()).notifications;
+    return n?.[kind] ?? DEFAULT_NOTIFICATIONS[kind];
   }
 
   invalidate() {

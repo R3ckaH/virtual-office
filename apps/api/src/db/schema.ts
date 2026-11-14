@@ -16,9 +16,11 @@ import {
   boolean,
   customType,
   date,
+  doublePrecision,
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   primaryKey,
@@ -30,6 +32,11 @@ import {
 import {
   AUTH_EVENT_TYPES,
   CHANNEL_KINDS,
+  DEFAULT_NOTIFICATIONS,
+  HOLIDAY_KINDS,
+  LEAVE_STATUSES,
+  TASK_STATUSES,
+  type NotificationSettings,
   CORRECTION_ACTIONS,
   CORRECTION_STATUSES,
   DAY_OVERRIDE_KINDS,
@@ -84,6 +91,9 @@ export const recurrenceEnum = pgEnum('recurrence', RECURRENCES);
 export const rsvpEnum = pgEnum('rsvp', RSVPS);
 export const recordingStatusEnum = pgEnum('recording_status', RECORDING_STATUSES);
 export const channelKindEnum = pgEnum('channel_kind', CHANNEL_KINDS);
+export const leaveStatusEnum = pgEnum('leave_status', LEAVE_STATUSES);
+export const taskStatusEnum = pgEnum('task_status', TASK_STATUSES);
+export const holidayKindEnum = pgEnum('holiday_kind', HOLIDAY_KINDS);
 export const preferSourceEnum = pgEnum('prefer_source', ['WEB', 'DEVICE']);
 
 /** Single-row table of company-wide settings (id is always 1). */
@@ -96,6 +106,8 @@ export const orgSettings = pgTable('org_settings', {
   sessionTimeoutMinutes: integer('session_timeout_minutes').notNull().default(30),
   /** Phase 4: an Admin allows meeting recordings (they also need storage configured on the server) */
   recordingEnabled: boolean('recording_enabled').notNull().default(false),
+  /** Phase 7: which emails the system sends */
+  notifications: jsonb('notifications').$type<NotificationSettings>().notNull().default(DEFAULT_NOTIFICATIONS),
   updatedAt: updatedAt(),
 });
 
@@ -103,6 +115,8 @@ export const departments = pgTable('departments', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: text('name').notNull().unique(),
   headUserId: uuid('head_user_id').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+  /** Phase 6: members file an end-of-day report before clocking out on the web */
+  requireDailyReport: boolean('require_daily_report').notNull().default(false),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -786,6 +800,114 @@ export const chatFiles = pgTable(
 
 export type Channel = typeof channels.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+
+/* ---------------- Phase 6: leave, tasks, end-of-day reports ---------------- */
+
+/** numeric(5,1) read as a number */
+const days = (name: string) => numeric(name, { precision: 5, scale: 1, mode: 'number' });
+
+export const leaveTypes = pgTable('leave_types', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  color: text('color').notNull().default('#2563eb'),
+  paid: boolean('paid').notNull().default(true),
+  yearlyDays: days('yearly_days'),
+  active: boolean('active').notNull().default(true),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+export const leaveRequests = pgTable(
+  'leave_requests',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    typeId: uuid('type_id')
+      .notNull()
+      .references(() => leaveTypes.id, { onDelete: 'restrict' }),
+    startDate: dateCol('start_date').notNull(),
+    endDate: dateCol('end_date').notNull(),
+    /** working days counted against the balance (rest days and holidays skipped) */
+    days: days('days').notNull(),
+    reason: text('reason').notNull(),
+    status: leaveStatusEnum('status').notNull().default('PENDING'),
+    decidedById: uuid('decided_by_id').references(() => users.id, { onDelete: 'set null' }),
+    decidedAt: ts('decided_at'),
+    decisionNote: text('decision_note'),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('leave_requests_user_idx').on(t.userId, t.startDate), index('leave_requests_dates_idx').on(t.startDate, t.endDate), index('leave_requests_status_idx').on(t.status)],
+);
+
+/** Extra (or fewer) days for one person and year: carry-over, special grants, corrections. */
+export const leaveAdjustments = pgTable(
+  'leave_adjustments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    typeId: uuid('type_id')
+      .notNull()
+      .references(() => leaveTypes.id, { onDelete: 'cascade' }),
+    year: integer('year').notNull(),
+    days: days('days').notNull(),
+    note: text('note').notNull(),
+    createdById: uuid('created_by_id').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('leave_adjustments_user_idx').on(t.userId, t.year)],
+);
+
+export const holidays = pgTable('holidays', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  date: dateCol('date').notNull().unique(),
+  name: text('name').notNull(),
+  kind: holidayKindEnum('kind').notNull().default('REGULAR'),
+  createdAt: createdAt(),
+});
+
+export const tasks = pgTable(
+  'tasks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: text('title').notNull(),
+    description: text('description'),
+    status: taskStatusEnum('status').notNull().default('TODO'),
+    assigneeId: uuid('assignee_id').references(() => users.id, { onDelete: 'set null' }),
+    createdById: uuid('created_by_id').references(() => users.id, { onDelete: 'set null' }),
+    departmentId: uuid('department_id').references(() => departments.id, { onDelete: 'set null' }),
+    dueDate: dateCol('due_date'),
+    completedAt: ts('completed_at'),
+    position: doublePrecision('position').notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index('tasks_assignee_idx').on(t.assigneeId, t.status), index('tasks_department_idx').on(t.departmentId, t.status), index('tasks_creator_idx').on(t.createdById)],
+);
+
+export const dailyReports = pgTable(
+  'daily_reports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    workDate: dateCol('work_date').notNull(),
+    accomplished: text('accomplished').notNull(),
+    blockers: text('blockers').notNull().default(''),
+    plan: text('plan').notNull().default(''),
+    submittedAt: ts('submitted_at').notNull().defaultNow(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex('daily_reports_uq').on(t.userId, t.workDate), index('daily_reports_date_idx').on(t.workDate)],
+);
+
+export type LeaveRequest = typeof leaveRequests.$inferSelect;
+export type Task = typeof tasks.$inferSelect;
 
 /* ---------------- relations (for the relational query API) ---------------- */
 
